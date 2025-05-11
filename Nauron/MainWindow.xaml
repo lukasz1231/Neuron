@@ -7,6 +7,21 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="150"/>
+        </Grid.RowDefinitions>
 
+        <StackPanel Orientation="Horizontal" Margin="10" Grid.Row="0" VerticalAlignment="Top">
+            <TextBox Name="FileNameBox" Width="150" Text="data1.txt" Margin="0,0,10,0"/>
+            <TextBox Name="MaxErrorBox" Width="80" Text="0.1" Margin="0,0,10,0" ToolTip="Maksymalny błąd"/>
+            <TextBox Name="MaxIterBox" Width="80" Text="100" Margin="0,0,10,0" ToolTip="Maksymalna liczba epok"/>
+            <Button Content="Trenuj" Click="TrainButton_Click"/>
+            <TextBlock Name="ErrorText" Margin="20,0,0,0" VerticalAlignment="Center" FontWeight="Bold"/>
+        </StackPanel>
+
+        <Canvas Name="PlotCanvas" Background="GhostWhite" Margin="10" Grid.Row="1"/>
+        <Canvas Name="ErrorPlotCanvas" Background="GhostWhite" Margin="10" Grid.Row="2"/>
     </Grid>
 </Window>

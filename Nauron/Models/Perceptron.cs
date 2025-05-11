@@ -16,6 +16,8 @@ namespace Nauron.Models
         private double w0;
         private int func = 1; //default
         private double biasToleration = 0.01; //default
+        private List<double> trainingErrors = new List<double>();
+
         public Perceptron(double[] trainingX, double[] trainingY, double[] testingX, double[] testingY, double biasToleration, int func) {
             this.trainingX = trainingX;
             this.trainingY = trainingY;
@@ -28,34 +30,39 @@ namespace Nauron.Models
             w0 = rand.NextDouble() > biasToleration ? 1 : -1; // NIE WIEM CZY DOBRZE
         }
 
-        public double Train(double[] X, double[] Y)
+        public double Train(double[] X, double[] Y, int maxEpochs)
         {
             Random rand = new Random();
             for (int i = 1; i < W.Length; i++)
             {
                 W[i] = rand.NextDouble();
             }
+
+            trainingErrors.Clear(); // reset przed nowym treningiem
+
             double trainedError = double.MaxValue;
             int eras = 0;
-            while (trainedError>biasToleration || eras++  >=10)
+
+            while (trainedError > biasToleration && eras++ <= maxEpochs) // ograniczenie epok - nie zawsze osiąga docelowy błąd
             {
                 double sumSquaredError = 0.0;
                 for (int t = 0; t < X.Length; t++)
                 {
                     double output = Calculate(trainingX);
                     double error = Y[t] - output;
+
                     if (error == 0)
-                    {
                         W[t + 1] = W[t];
-                    }
                     else
-                    {
-                        W[t + 1] = W[t]+trainingX[t]*trainingY[t];
-                    }  
-                    sumSquaredError += error*error;
+                        W[t + 1] = W[t] + trainingX[t] * trainingY[t];
+
+                    sumSquaredError += error * error;
                 }
-                trainedError = sumSquaredError/trainingX.Length;
+
+                trainedError = sumSquaredError / trainingX.Length;
+                trainingErrors.Add(trainedError); // ZAPIS DO HISTORII
             }
+
             return trainedError;
         }
 
@@ -117,6 +124,7 @@ namespace Nauron.Models
         {
             return W;
         }
+        public List<double> GetTrainingErrors() => trainingErrors;
 
     }
 }
