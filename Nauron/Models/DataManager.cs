@@ -13,7 +13,7 @@ namespace Nauron.Models
         public (double[] trainingX, double[] trainingY, double[] testingX, double[] testingY)
             LoadData(string fileName, double trainPercent)
         {
-            string filePath = Path.Combine("C:\\Users\\lkuci\\source\\repos\\Nauron\\Nauron\\Data\\", fileName);
+            string filePath = Path.Combine("../../../Data/", fileName);
             if (!File.Exists(filePath))
             {
                 throw new FileNotFoundException($"Plik {filePath} nie istnieje.");
