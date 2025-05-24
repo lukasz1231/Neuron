@@ -165,8 +165,7 @@ namespace Nauron
                 MessageBox.Show(ex.Message);
                 return;
             }
-            ErrorText.Text = $"Trained with error: {error:F4}";
-
+            ErrorText.Content = $"Trained with error: {error:F4}";
             DrawData();
             DrawDecisionBoundary();
             DrawErrorPlot(neuron.GetTrainingErrors());
@@ -189,7 +188,7 @@ namespace Nauron
         private void DrawErrorPlot(List<double> errors)
         {
             ErrorPlotCanvas.Children.Clear();
-            DrawAxesWithLabels(ErrorPlotCanvas); // Dodanie osi z etykietami
+            DrawAxesWithLabels(ErrorPlotCanvas, false); // Dodanie osi z etykietami
 
             if (errors.Count < 2) return;
 
@@ -208,30 +207,32 @@ namespace Nauron
             for (int i = 0; i < errors.Count; i++)
             {
                 double x = (i / (double)(errors.Count - 1)) * (width - 20) + 10;
-                double y = height - (errors[i] / maxError) * (height - 20) - 10;
+                double y = (errors[i] / maxError) * (height - 20) - 10;
                 polyline.Points.Add(new Point(x, y));
             }
 
             ErrorPlotCanvas.Children.Add(polyline);
         }
 
-        private void DrawAxesWithLabels(Canvas canvas)
+        private void DrawAxesWithLabels(Canvas canvas, bool withX=true)
         {
             double width = canvas.ActualWidth;
             double height = canvas.ActualHeight;
 
-            // Rysowanie osi X
-            Line xAxis = new Line
+            if (withX)
             {
-                X1 = 0,
-                Y1 = height / 2,
-                X2 = width,
-                Y2 = height / 2,
-                Stroke = Brushes.Black,
-                StrokeThickness = 1
-            };
-            canvas.Children.Add(xAxis);
-
+                // Rysowanie osi X
+                Line xAxis = new Line
+                {
+                    X1 = 0,
+                    Y1 = height / 2,
+                    X2 = width,
+                    Y2 = height / 2,
+                    Stroke = Brushes.Black,
+                    StrokeThickness = 1
+                };
+                canvas.Children.Add(xAxis);
+            }
             // Rysowanie osi Y
             Line yAxis = new Line
             {
@@ -256,21 +257,23 @@ namespace Nauron
             double yMin = trainingD.Min();
             double yMax = trainingD.Max();
 
-            // Rysowanie etykiet na osi X (co 1 jednostka)
-            for (int i = (int)xMin; i <= xMax; i++)
+            if (withX)
             {
-                double x = Normalize(i, xMin, xMax, 10, width - 10);
-                TextBlock label = new TextBlock
+                // Rysowanie etykiet na osi X (co 1 jednostka)
+                for (int i = (int)xMin; i <= xMax; i++)
                 {
-                    Text = i.ToString(),
-                    Foreground = Brushes.Black,
-                    FontSize = 10
-                };
-                Canvas.SetLeft(label, x - 10);
-                Canvas.SetTop(label, height / 2 + 5);
-                canvas.Children.Add(label);
+                    double x = Normalize(i, xMin, xMax, 10, width - 10);
+                    TextBlock label = new TextBlock
+                    {
+                        Text = i.ToString(),
+                        Foreground = Brushes.Black,
+                        FontSize = 10
+                    };
+                    Canvas.SetLeft(label, x - 10);
+                    Canvas.SetTop(label, height / 2 + 5);
+                    canvas.Children.Add(label);
+                }
             }
-
             // Rysowanie etykiet na osi Y (co 1 jednostka)
             for (int j = (int)yMin; j <= yMax; j++)
             {

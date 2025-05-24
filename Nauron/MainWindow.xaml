@@ -33,7 +33,7 @@
         </StackPanel>
 
         <Canvas Name="PlotCanvas" Background="GhostWhite" Margin="10" Grid.Row="2"/>
-        <TextBlock x:Name="ErrorText" Text="" FontWeight="Bold" Margin="10" Grid.Row="2"/>
+        <Label x:Name="ErrorText" Content="" FontWeight="Bold" Margin="10" Grid.Row="2"/>
         <Canvas Name="ErrorPlotCanvas" Background="GhostWhite" Margin="10" Grid.Row="3"/>
     </Grid>
 </Window>
