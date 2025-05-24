@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 interface Neuron
 {
     public void InitTrain();
-    public void TrainToBias(double biasToleration, long maxIterations);
-    public void TrainToIterations(long maxIterations);
-    public void SingleIterationTrain();
+    public double TrainToBias(double biasToleration, long maxIterations);
+    public double TrainToIterations(long maxIterations);
+    public double SingleIterationTrain();
 
     public double Test();
     public double Calculate(double[] X, int index);

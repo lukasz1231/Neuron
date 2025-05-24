@@ -13,7 +13,6 @@ namespace Nauron.Models
         List<List<double>> testingX;
         double[] testingD;
         List<List<double>> W;
-        double[] w0;
         double trainedError;
         int func;
         List<double> trainingErrors = new List<double>();
@@ -24,31 +23,31 @@ namespace Nauron.Models
             this.testingD = testingD;
             this.testingX = testingX;
             this.func = func;
-            this.W = new List<List<double>>(trainingX.Count+1);
+            this.W = new List<List<double>>(trainingX.Count);
             rand = new Random();
-            for(int i=0;i<w0.Length;i++)
-                w0[i] = rand.NextDouble();
         }
         public void InitTrain()
         {
-            for (int i = 0; i < W.Count; i++)
+            W.Clear();
+            for (int i = 0; i < trainingX.Count; i++)
             {
-                for (int j = 0; j < trainingX[i].Count; i++)
+                for (int j = 0; j < trainingX[i].Count; j++)
                 {
-                    if (j == 0) W[i]= new List<double>(trainingX[i].Count+1);
-                    W[i][j] = rand.NextDouble();
+                    if (j == 0) W.Add(new List<double>(trainingX[i].Count));
+                    W[i].Add(rand.NextDouble());
                 }
             }
             trainingErrors.Clear();
             trainedError = double.MaxValue;
         }
-        public void TrainToBias(double biasToleration, long maxIterations)
+        public double TrainToBias(double biasToleration, long maxIterations)
         {
             if (biasToleration <= 0)
                 throw new ArgumentException("Złożoność tolerancji mniejsza lub równa 0");
             if (maxIterations <= 0)
                 throw new ArgumentException("Maksymalna liczba iteracji mniejsza lub równa 0");
-
+            if (W[0] == null)
+                InitTrain();
             while (trainedError > biasToleration || maxIterations<0)
             {
                 maxIterations--;
@@ -68,11 +67,14 @@ namespace Nauron.Models
                 trainedError = sumSquaredError / trainingX.Count;
                 trainingErrors.Add(trainedError); // ZAPIS DO HISTORII
             }
+            return trainedError;
         }
-        public void TrainToIterations(long maxIterations)
+        public double TrainToIterations(long maxIterations)
         {
             if (maxIterations <= 0)
                 throw new ArgumentException("Maksymalna liczba iteracji mniejsza lub równa 0");
+            if (W[0] == null)
+                InitTrain();
 
             while (maxIterations < 0)
             {
@@ -93,9 +95,12 @@ namespace Nauron.Models
                 trainedError = sumSquaredError / trainingX.Count;
                 trainingErrors.Add(trainedError); // ZAPIS DO HISTORII
             }
+            return trainedError;
         }
-        public void SingleIterationTrain()
+        public double SingleIterationTrain()
         {
+            if (W[0] == null)
+                InitTrain();
             double sumSquaredError = 0.0;
             for (int t = 0; t < trainingX.Count; t++)
             {
@@ -111,6 +116,7 @@ namespace Nauron.Models
 
             trainedError = sumSquaredError / trainingX.Count;
             trainingErrors.Add(trainedError);
+            return trainedError;
         }
 
         public double Test()

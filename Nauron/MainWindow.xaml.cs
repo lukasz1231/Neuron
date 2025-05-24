@@ -1,4 +1,5 @@
 ﻿using Nauron.Models;
+using System;
 using System.IO;
 using System.Text;
 using System.Windows;
@@ -34,22 +35,31 @@ namespace Nauron
 
             double width = PlotCanvas.ActualWidth;
             double height = PlotCanvas.ActualHeight;
-
-            for (int i = 0; i < trainingX.Length; i++)
+            double max=0, min=double.MaxValue;
+            for (int i = 0; i < trainingX.Count; i++)
             {
-                double x = Normalize(trainingX[i], trainingX.Min(), trainingX.Max(), 10, width - 10);
-                double y = height / 2;
+                if (trainingX[i].Max()>max)
+                    max = trainingX[i].Max();
+                if(trainingX[i].Min()<min)
+                    min= trainingX[i].Min();
+            }
+            for (int i = 0; i < trainingX.Count; i++)
+            {
+                for(int j = 0; j < trainingX[i].Count; j++){
+                    double x = Normalize(trainingX[i][j], min, max, 10, width - 10);
+                    double y = height / 2;
 
-                Ellipse point = new Ellipse
-                {
-                    Width = 6,
-                    Height = 6,
-                    Fill = trainingD[i] > 0 ? Brushes.Green : Brushes.Red
-                };
+                    Ellipse point = new Ellipse
+                    {
+                        Width = 6,
+                        Height = 6,
+                        Fill = trainingD[i] > 0 ? Brushes.Green : Brushes.Red
+                    };
 
-                Canvas.SetLeft(point, x - 3);
-                Canvas.SetTop(point, y - 3);
-                PlotCanvas.Children.Add(point);
+                    Canvas.SetLeft(point, x - 3);
+                    Canvas.SetTop(point, y - 3);
+                        PlotCanvas.Children.Add(point);
+                }
             }
         }
 
@@ -58,13 +68,22 @@ namespace Nauron
             double width = PlotCanvas.ActualWidth;
             double height = PlotCanvas.ActualHeight;
 
-            double[] weights = neuron.GetWeights();
-            if (weights.Length < 2 || weights[1] == 0)
+            List<List<double>> weights = neuron.GetWeights();
+            if (weights.Count<2 || weights[1][0]==0)
                 return; // brak dzielenia przez zero lub brakujących danych
 
-            double thresholdX = -weights[0] / weights[1];
+            double thresholdX = -weights[0][0] / weights[1][0];
 
-            double x = Normalize(thresholdX, trainingX.Min(), trainingX.Max(), 10, width - 10);
+            double max = 0, min = double.MaxValue;
+            for (int i = 0; i < trainingX.Count; i++)
+            {
+                if (trainingX[i].Max() > max)
+                    max = trainingX[i].Max();
+                if (trainingX[i].Min() < min)
+                    min = trainingX[i].Min();
+            }
+
+            double x = Normalize(thresholdX, min, max, 10, width - 10);
 
             Line line = new Line
             {
@@ -81,10 +100,10 @@ namespace Nauron
         }
         private void FunctionButton_Click(object sender, RoutedEventArgs e)
         {
+            if (fs == null) fs = new FunctionSelector(this);
             if(!fs.IsActive){
                 if(!fs.IsLoaded){
                     fs = new FunctionSelector(this);
-                    Loaded += fs.FunctionSelector_Loaded;
                 }
                 fs.Show();
             }
@@ -93,34 +112,62 @@ namespace Nauron
         {
             neuron.ChangeFunction(i);
         }
+        private void InitButton_Click(object sender, RoutedEventArgs e)
+        {
+            neuron.InitTrain();
+        }
         private void TrainButton_Click(object sender, RoutedEventArgs e)
         {
             string fileName = FileNameBox.Text.Trim();
+            double error;
             try
             {
-                (trainingX, trainingD, testingX, testingD) = dataManager.LoadData(fileName, 0.7);
+                (trainingX, trainingD, testingX, testingD) = dataManager.LoadData(fileName, Convert.ToDouble(UlamekTestowych.Text));
+                neuron.newData(trainingX, trainingD, testingX, testingD);
+                if (CheckboxErr.IsChecked ?? false){
+                    error = neuron.TrainToBias(Convert.ToDouble(MaxErrorBox.Text), Convert.ToInt64(MaxIterBox.Text));
+                }
+                else if (CheckboxIter.IsChecked ?? false)
+                    error = neuron.TrainToIterations(Convert.ToInt64(MaxIterBox.Text));
+                else if (CheckboxSingle.IsChecked ?? false)
+                    error = neuron.SingleIterationTrain();
+                else
+                {
+                    MessageBox.Show("Wybrano niepoprawny tryb trenowania");
+                    return;
+                }
             }
-            catch(FileNotFoundException ex)
+            catch (ArgumentException ex)
             {
                 MessageBox.Show(ex.Message);
                 return;
             }
-            catch(ArgumentException ex)
+            catch (FileNotFoundException ex)
             {
                 MessageBox.Show(ex.Message);
                 return;
             }
-            neuron.newData(trainingX, trainingD, testingX, testingD);
-            long maxEpochs = long.Parse(MaxIterBox.Text.Trim());
-            double error = neuron.Train(trainingX, trainingD, maxEpochs);
-
             ErrorText.Text = $"Trained with error: {error:F4}";
 
             DrawData();
             DrawDecisionBoundary();
             DrawErrorPlot(neuron.GetTrainingErrors());
         }
-
+        public void ChangeTrainingModeSingle(object sender, RoutedEventArgs e)
+        {
+            CheckboxIter.IsChecked = false;
+            CheckboxErr.IsChecked = false;
+        }
+        public void ChangeTrainingModeMaxIt(object sender, RoutedEventArgs e)
+        {
+            CheckboxErr.IsChecked = false;
+            CheckboxSingle.IsChecked = false;
+        }
+        public void ChangeTrainingModeMaxErr(object sender, RoutedEventArgs e)
+        {
+            CheckboxSingle.IsChecked= false;
+            CheckboxIter.IsChecked= false;
+        }
         private void DrawErrorPlot(List<double> errors)
         {
             ErrorPlotCanvas.Children.Clear();
@@ -179,8 +226,14 @@ namespace Nauron
             canvas.Children.Add(yAxis);
 
             // Przeskalowanie wartości dla osi X i Y
-            double xMin = trainingX.Min();
-            double xMax = trainingX.Max();
+            double xMax = 0, xMin = double.MaxValue;
+            for (int i = 0; i < trainingX.Count; i++)
+            {
+                if (trainingX[i].Max() > xMax)
+                    xMax = trainingX[i].Max();
+                if (trainingX[i].Min() < xMin)
+                    xMin = trainingX[i].Min();
+            }
             double yMin = trainingD.Min();
             double yMax = trainingD.Max();
 
@@ -220,32 +273,12 @@ namespace Nauron
             return targetMin + (value - min) / (max - min) * (targetMax - targetMin);
         }
 
-        private string GetEquation()
-        {
-            var weights = neuron.GetWeights();
-            if (weights.Length < 3 || weights[2] == 0) return "Brak równania (dzielenie przez 0)";
-
-            double a = -weights[1] / weights[2];
-            double b = -weights[0] / weights[2];
-
-            return $"y = {a:F2}x + {b:F2}";
-        }
-
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            fs = new FunctionSelector(this);
-            Loaded += fs.FunctionSelector_Loaded;
+            CheckboxSingle.IsChecked = true;
             dataManager = new DataManager();
             (trainingX, trainingD, testingX, testingD) = dataManager.LoadData("data1.txt", 0.7);
-            neuron = new Perceptron(trainingX, trainingD, testingX, testingD, 0.1, 1);
-            int maxEpochs = int.Parse(MaxIterBox.Text.Trim());
-            double error = neuron.Train(trainingX, trainingD, maxEpochs);
-
-            ErrorText.Text = $"Trained with error: {error:F4}, Prosta: {GetEquation()}";
-
-            DrawData();
-            DrawDecisionBoundary();
-            DrawErrorPlot(neuron.GetTrainingErrors());
+            neuron = new Perceptron(trainingX, trainingD, testingX, testingD, 1);
         }
 
         public MainWindow()

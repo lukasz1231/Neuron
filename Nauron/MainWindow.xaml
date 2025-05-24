@@ -5,25 +5,35 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Nauron"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="850">
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="150"/>
         </Grid.RowDefinitions>
-
-        <StackPanel Orientation="Horizontal" Margin="10" Grid.Row="0" VerticalAlignment="Top">
+        <StackPanel Orientation="Horizontal" Grid.Row="0">
+            <Label Content="Plik z danymi" Margin="40,0,0,0"/>
+            <Label Content="Maksymalny błąd" Margin="90,0,0,0"/>
+            <Label Content="Maksymalna liczba iteracji" Margin="0,0,10,0"/>
+            <CheckBox x:Name="CheckboxSingle" Checked="ChangeTrainingModeSingle"  Content="Pojedyncza iteracja" Margin="0,0,10,0"></CheckBox>
+            <CheckBox x:Name="CheckboxIter" Checked="ChangeTrainingModeMaxIt" Content="Maksymalna liczba iteracji" Margin="0,0,10,0"></CheckBox>
+            <CheckBox x:Name="CheckboxErr" Checked="ChangeTrainingModeMaxErr" Content="Do błedu"></CheckBox>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="10" Grid.Row="1" VerticalAlignment="Top">
             <TextBox x:Name="FileNameBox" Width="150" Text="data1.txt"/>
             <Button Content="Funckja" Margin="10,0,10,0" Click="FunctionButton_Click"/>
             <TextBox x:Name="MaxErrorBox" Width="80" Text="0.1" Margin="0,0,10,0" ToolTip="Maksymalny błąd"/>
-            <TextBox x:Name="MaxIterBox" Width="80" Text="100" Margin="0,0,10,0" ToolTip="Maksymalna liczba epok"/>
-            <Button Content="Trenuj" Click="TrainButton_Click"/>
-            <TextBlock x:Name="ErrorText" Margin="20,0,0,0" VerticalAlignment="Center" FontWeight="Bold"/>
+            <TextBox x:Name="MaxIterBox" Width="80" Text="100" Margin="30,0,10,0" ToolTip="Maksymalna liczba iteracji"/>
+            <Button Content="Trenuj na nowo" Click="InitButton_Click"/>
+            <Button Content="Trenuj" Click="TrainButton_Click" Margin="30,0,10,0"/>
+            <Label Content="Część danych testowych" Margin="10,0,10,0"></Label>
+            <TextBox x:Name="UlamekTestowych" Width="80" Text="0,7" ToolTip="Ułamek wyznaczający podział danych"/>
         </StackPanel>
+        <TextBlock x:Name="ErrorText" Text="" FontWeight="Bold" Grid.Row="2"/>
 
-
-        <Canvas Name="PlotCanvas" Background="GhostWhite" Margin="10" Grid.Row="1"/>
-        <Canvas Name="ErrorPlotCanvas" Background="GhostWhite" Margin="10" Grid.Row="2"/>
+        <Canvas Name="PlotCanvas" Background="GhostWhite" Margin="10" Grid.Row="2"/>
+        <Canvas Name="ErrorPlotCanvas" Background="GhostWhite" Margin="10" Grid.Row="3"/>
     </Grid>
 </Window>
