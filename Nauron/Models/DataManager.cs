@@ -16,7 +16,7 @@ namespace Nauron.Models
             string filePath = Path.Combine("../../../Data/", fileName);
             if (!File.Exists(filePath))
             {
-                throw new FileNotFoundException($"Plik {filePath} nie istnieje.");
+                throw new FileNotFoundException($"Plik {fileName} nie istnieje.");
             }
             if (trainPercent <= 0 || trainPercent >= 1)
                 throw new ArgumentException("trainPercent musi być liczbą z przedziału (0, 1).");

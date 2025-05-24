@@ -1,4 +1,5 @@
 ﻿using Nauron.Models;
+using System.IO;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -82,8 +83,22 @@ namespace Nauron
         {
             try
             {
+                FileNameBoxError.Text= "";
                 string fileName = FileNameBox.Text.Trim();
-                (trainingX, trainingY, testingX, testingY) = dataManager.LoadData(fileName, 0.7);
+                try
+                {
+                    (trainingX, trainingY, testingX, testingY) = dataManager.LoadData(fileName, 0.7);
+                }
+                catch(FileNotFoundException ex)
+                {
+                    FileNameBoxError.Text= ex.Message;
+                    return;
+                }
+                catch(ArgumentException ex)
+                {
+                    FileNameBoxError.Text= ex.Message;
+                    return;
+                }
                 perceptron.newData(trainingX, trainingY, testingX, testingY);
                 int maxEpochs = int.Parse(MaxIterBox.Text.Trim());
                 double error = perceptron.Train(trainingX, trainingY, maxEpochs);
