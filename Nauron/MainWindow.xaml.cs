@@ -22,7 +22,7 @@ namespace Nauron
         double[] trainingY;
         double[] testingX;
         double[] testingY;
-        Perceptron perceptron;
+        Neuron neuron;
         DataManager dataManager;
 
 
@@ -57,7 +57,7 @@ namespace Nauron
             double width = PlotCanvas.ActualWidth;
             double height = PlotCanvas.ActualHeight;
 
-            double[] weights = perceptron.GetWeights();
+            double[] weights = neuron.GetWeights();
             if (weights.Length < 2 || weights[1] == 0)
                 return; // brak dzielenia przez zero lub brakujących danych
 
@@ -96,9 +96,9 @@ namespace Nauron
                 MessageBox.Show(ex.Message);
                 return;
             }
-            perceptron.newData(trainingX, trainingY, testingX, testingY);
+            neuron.newData(trainingX, trainingY, testingX, testingY);
             int maxEpochs = int.Parse(MaxIterBox.Text.Trim());
-            double error = perceptron.Train(trainingX, trainingY, maxEpochs);
+            double error = neuron.Train(trainingX, trainingY, maxEpochs);
 
             ErrorText.Text = $"Trained with error: {error:F4}";
 
@@ -207,7 +207,7 @@ namespace Nauron
 
         private string GetEquation()
         {
-            var weights = perceptron.GetWeights();
+            var weights = neuron.GetWeights();
             if (weights.Length < 3 || weights[2] == 0) return "Brak równania (dzielenie przez 0)";
 
             double a = -weights[1] / weights[2];
@@ -216,19 +216,24 @@ namespace Nauron
             return $"y = {a:F2}x + {b:F2}";
         }
 
+        public void ChangeFunction()
+        {
+
+        }
+
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             dataManager = new DataManager();
             (trainingX, trainingY, testingX, testingY) = dataManager.LoadData("data1.txt", 0.7);
-            perceptron = new Perceptron(trainingX, trainingY, testingX, testingY, 0.1, 1);
+            neuron = new Perceptron(trainingX, trainingY, testingX, testingY, 0.1, 1);
             int maxEpochs = int.Parse(MaxIterBox.Text.Trim());
-            double error = perceptron.Train(trainingX, trainingY, maxEpochs);
+            double error = neuron.Train(trainingX, trainingY, maxEpochs);
 
             ErrorText.Text = $"Trained with error: {error:F4}, Prosta: {GetEquation()}";
 
             DrawData();
             DrawDecisionBoundary();
-            DrawErrorPlot(perceptron.GetTrainingErrors());
+            DrawErrorPlot(neuron.GetTrainingErrors());
         }
 
         public MainWindow()

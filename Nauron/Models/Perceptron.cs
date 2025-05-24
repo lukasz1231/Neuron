@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Nauron.Models
 {
-    internal class Perceptron
+    internal class Perceptron : Neuron
     {
         private double[] trainingX;
         private double[] trainingY;
@@ -112,6 +112,10 @@ namespace Nauron.Models
                 default:
                     throw new ArgumentException("Unknown activation function");
             }
+        }
+        public void ChangeFunction(int func)
+        {
+            this.func = func;
         }
         public void newData(double[] trainingX, double[] trainingY, double[] testingX, double[] testingY)
         {
