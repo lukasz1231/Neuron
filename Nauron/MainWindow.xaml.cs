@@ -35,19 +35,22 @@ namespace Nauron
 
             double width = PlotCanvas.ActualWidth;
             double height = PlotCanvas.ActualHeight;
-            double max=0, min=double.MaxValue;
+            double maxX=0, minX=double.MaxValue, maxY = 0, minY = double.MaxValue;
             for (int i = 0; i < trainingX.Count; i++)
             {
-                if (trainingX[i].Max()>max)
-                    max = trainingX[i].Max();
-                if(trainingX[i].Min()<min)
-                    min= trainingX[i].Min();
+                if (trainingX[i][0]>maxX)
+                    maxX = trainingX[i][0];
+                if (trainingX[i][0]<minX)
+                    minX= trainingX[i][0];
+                if (trainingX[i][1] > maxY)
+                    maxY = trainingX[i][1];
+                if (trainingX[i][1] < minY)
+                    minY = trainingX[i][1];
             }
             for (int i = 0; i < trainingX.Count; i++)
             {
-                for(int j = 0; j < trainingX[i].Count; j++){
-                    double x = Normalize(trainingX[i][j], min, max, 10, width - 10);
-                    double y = height / 2;
+                    double x = Normalize(trainingX[i][0], minX, maxX, 10, width - 10);
+                    double y = Normalize(trainingX[i][1], minY, maxY, 10, height - 10);
 
                     Ellipse point = new Ellipse
                     {
@@ -56,10 +59,9 @@ namespace Nauron
                         Fill = trainingD[i] > 0 ? Brushes.Green : Brushes.Red
                     };
 
-                    Canvas.SetLeft(point, x - 3);
-                    Canvas.SetTop(point, y - 3);
+                    Canvas.SetLeft(point, x);
+                    Canvas.SetTop(point, y);
                         PlotCanvas.Children.Add(point);
-                }
             }
         }
 
