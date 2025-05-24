@@ -54,7 +54,7 @@ namespace Nauron.Models
 
                     if (!(error == 0))
                         for(int i = 0; i < trainingX[t].Count; i++)
-                        W[t][i] = W[t][i] + trainingX[t][i] * trainingD[t];
+                        W[t][i] = W[t][i] + trainingX[t][i] * error;
 
                     sumSquaredError += error * error;
                 }
@@ -82,7 +82,7 @@ namespace Nauron.Models
 
                     if (!(error == 0))
                         for (int i = 0; i < trainingX[t].Count; i++)
-                            W[t][i] = W[t][i] + trainingX[t][i] * trainingD[t];
+                            W[t][i] = W[t][i] + trainingX[t][i] * error;
 
                     sumSquaredError += error * error;
                 }
@@ -104,7 +104,7 @@ namespace Nauron.Models
 
                 if (!(error == 0))
                     for (int i = 0; i < trainingX[t].Count; i++)
-                        W[t][i] = W[t][i] + trainingX[t][i] * trainingD[t];
+                        W[t][i] = W[t][i] + trainingX[t][i] * error;
 
                 sumSquaredError += error * error;
             }

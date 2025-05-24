@@ -165,7 +165,7 @@ namespace Nauron
                 MessageBox.Show(ex.Message);
                 return;
             }
-ErrorText.Text = $"Trained with error: {error:F4}";
+            ErrorText.Text = $"Trained with error: {error:F4}";
 
             DrawData();
             DrawDecisionBoundary();
