@@ -114,6 +114,22 @@ namespace Nauron
         }
         private void InitButton_Click(object sender, RoutedEventArgs e)
         {
+            try
+            {
+                string fileName = FileNameBox.Text.Trim(); 
+                (trainingX, trainingD, testingX, testingD) = dataManager.LoadData(fileName, double.Parse(UlamekTestowych.Text));
+                neuron.newData(trainingX, trainingD, testingX, testingD);
+            }
+            catch (ArgumentException ex)
+            {
+                MessageBox.Show(ex.Message);
+                return;
+            }
+            catch (FileNotFoundException ex)
+            {
+                MessageBox.Show(ex.Message);
+                return;
+            }
             neuron.InitTrain();
         }
         private void TrainButton_Click(object sender, RoutedEventArgs e)
@@ -135,8 +151,8 @@ namespace Nauron
                 {
                     MessageBox.Show("Wybrano niepoprawny tryb trenowania");
                     return;
-                }
             }
+        }
             catch (ArgumentException ex)
             {
                 MessageBox.Show(ex.Message);
@@ -147,7 +163,7 @@ namespace Nauron
                 MessageBox.Show(ex.Message);
                 return;
             }
-            ErrorText.Text = $"Trained with error: {error:F4}";
+ErrorText.Text = $"Trained with error: {error:F4}";
 
             DrawData();
             DrawDecisionBoundary();
@@ -277,9 +293,8 @@ namespace Nauron
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             CheckboxSingle.IsChecked = true;
+            neuron = new Perceptron(1);
             dataManager = new DataManager();
-            (trainingX, trainingD, testingX, testingD) = dataManager.LoadData("data1.txt", 0.7);
-            neuron = new Perceptron(trainingX, trainingD, testingX, testingD, 1);
         }
 
         public MainWindow()

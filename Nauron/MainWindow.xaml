@@ -28,8 +28,8 @@
             <TextBox x:Name="MaxIterBox" Width="80" Text="100" Margin="30,0,10,0" ToolTip="Maksymalna liczba iteracji"/>
             <Button Content="Trenuj na nowo" Click="InitButton_Click"/>
             <Button Content="Trenuj" Click="TrainButton_Click" Margin="30,0,10,0"/>
-            <Label Content="Część danych testowych" Margin="10,0,10,0"></Label>
-            <TextBox x:Name="UlamekTestowych" Width="80" Text="0,7" ToolTip="Ułamek wyznaczający podział danych"/>
+            <Label Content="Część danych treningowych" Margin="10,0,2,0"></Label>
+            <TextBox x:Name="UlamekTestowych" Width="28" Text="0,7" ToolTip="Ułamek wyznaczający podział danych"/>
         </StackPanel>
 
         <Canvas Name="PlotCanvas" Background="GhostWhite" Margin="10" Grid.Row="2"/>

@@ -17,14 +17,8 @@ namespace Nauron.Models
         int func;
         List<double> trainingErrors;
         Random rand;
-        public Perceptron(List<List<double>> trainingX, double[] trainingD, List<List<double>> testingX, double[] testingD, int func) {
-            this.trainingX = trainingX;
-            this.trainingD = trainingD;
-            this.testingD = testingD;
-            this.testingX = testingX;
+        public Perceptron(int func) {
             this.func = func;
-            this.W = new List<List<double>>(trainingX.Count);
-            trainingErrors = new List<double>();
             rand = new Random();
         }
         public void InitTrain()
@@ -47,7 +41,7 @@ namespace Nauron.Models
                 throw new ArgumentException("Złożoność tolerancji mniejsza lub równa 0");
             if (maxIterations <= 0)
                 throw new ArgumentException("Maksymalna liczba iteracji mniejsza lub równa 0");
-            if (W[0] == null)
+            if (W.Count == 0)
                 InitTrain();
             while (trainedError > biasToleration && maxIterations>=0)
             {
@@ -74,7 +68,7 @@ namespace Nauron.Models
         {
             if (maxIterations <= 0)
                 throw new ArgumentException("Maksymalna liczba iteracji mniejsza lub równa 0");
-            if (W[0] == null)
+            if (W.Count == 0)
                 InitTrain();
 
             while (maxIterations >= 0)
@@ -100,7 +94,7 @@ namespace Nauron.Models
         }
         public double SingleIterationTrain()
         {
-            if (W[0] == null)
+            if (W.Count==0)
                 InitTrain();
             double sumSquaredError = 0.0;
             for (int t = 0; t < trainingX.Count; t++)
@@ -177,6 +171,8 @@ namespace Nauron.Models
             this.testingX = testingX;
             this.trainingD = trainingD;
             this.testingD = testingD;
+            this.W = new List<List<double>>(trainingX.Count);
+            trainingErrors = new List<double>();
         }
         public List<List<double>> GetWeights()
         {

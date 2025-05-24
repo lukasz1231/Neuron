@@ -39,6 +39,14 @@ namespace Nauron.Models
                     }
                 }
                 d=stack.Pop();
+                if (stack.Count!=2)
+                {
+                    throw new ArgumentException("Niepoprawna ilość wartości w wektorze ( " + stack.Count+" ), gdy powinno być: 2");
+                }
+                if (!(d==1 || d == 0))
+                {
+                    throw new ArgumentException("Niepoprawna wartość wzorcowa w wierszu "+(allData.Count+1));
+                }
                 allData.Add((stack.ToList(), d));
             }
 
