@@ -22,6 +22,7 @@ namespace Nauron
         double[] trainingY;
         double[] testingX;
         double[] testingY;
+        FunctionSelector fs;
         Neuron neuron;
         DataManager dataManager;
 
@@ -78,7 +79,20 @@ namespace Nauron
 
             PlotCanvas.Children.Add(line);
         }
-
+        private void FunctionButton_Click(object sender, RoutedEventArgs e)
+        {
+            if(!fs.IsActive){
+                if(!fs.IsLoaded){
+                    fs = new FunctionSelector(this);
+                    Loaded += fs.FunctionSelector_Loaded;
+                }
+                fs.Show();
+            }
+        }
+        public void ChangeFunction(int i)
+        {
+            neuron.ChangeFunction(i);
+        }
         private void TrainButton_Click(object sender, RoutedEventArgs e)
         {
             string fileName = FileNameBox.Text.Trim();
@@ -104,6 +118,7 @@ namespace Nauron
 
             DrawData();
             DrawDecisionBoundary();
+            DrawErrorPlot(neuron.GetTrainingErrors());
         }
 
         private void DrawErrorPlot(List<double> errors)
@@ -216,13 +231,10 @@ namespace Nauron
             return $"y = {a:F2}x + {b:F2}";
         }
 
-        public void ChangeFunction()
-        {
-
-        }
-
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            fs = new FunctionSelector(this);
+            Loaded += fs.FunctionSelector_Loaded;
             dataManager = new DataManager();
             (trainingX, trainingY, testingX, testingY) = dataManager.LoadData("data1.txt", 0.7);
             neuron = new Perceptron(trainingX, trainingY, testingX, testingY, 0.1, 1);
