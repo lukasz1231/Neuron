@@ -8,81 +8,128 @@ namespace Nauron.Models
 {
     internal class Perceptron : Neuron
     {
-        private double[] trainingX;
-        private double[] trainingY;
-        private double[] testingX;
-        private double[] testingY;
-        private double[] W;
-        private double w0;
-        private int func = 1; //default
-        private double biasToleration = 0.01; //default
-        private List<double> trainingErrors = new List<double>();
-
-        public Perceptron(double[] trainingX, double[] trainingY, double[] testingX, double[] testingY, double biasToleration, int func) {
+        List<List<double>> trainingX;
+        double[] trainingD;
+        List<List<double>> testingX;
+        double[] testingD;
+        List<List<double>> W;
+        double[] w0;
+        double trainedError;
+        int func;
+        List<double> trainingErrors = new List<double>();
+        Random rand;
+        public Perceptron(List<List<double>> trainingX, double[] trainingD, List<List<double>> testingX, double[] testingD, int func) {
             this.trainingX = trainingX;
-            this.trainingY = trainingY;
-            this.testingY = testingY;
+            this.trainingD = trainingD;
+            this.testingD = testingD;
             this.testingX = testingX;
-            this.biasToleration = biasToleration;
             this.func = func;
-            this.W = new double[trainingX.Length+1];
-            Random rand = new Random();
-            w0 = rand.NextDouble() > biasToleration ? 1 : -1; // NIE WIEM CZY DOBRZE
+            this.W = new List<List<double>>(trainingX.Count+1);
+            rand = new Random();
+            for(int i=0;i<w0.Length;i++)
+                w0[i] = rand.NextDouble();
         }
-
-        public double Train(double[] X, double[] Y, int maxEpochs)
+        public void InitTrain()
         {
-            Random rand = new Random();
-            for (int i = 1; i < W.Length; i++)
+            for (int i = 0; i < W.Count; i++)
             {
-                W[i] = rand.NextDouble();
-            }
-
-            trainingErrors.Clear(); // reset przed nowym treningiem
-
-            double trainedError = double.MaxValue;
-            int eras = 0;
-
-            while (trainedError > biasToleration && eras++ <= maxEpochs) // ograniczenie epok - nie zawsze osiąga docelowy błąd
-            {
-                double sumSquaredError = 0.0;
-                for (int t = 0; t < X.Length; t++)
+                for (int j = 0; j < trainingX[i].Count; i++)
                 {
-                    double output = Calculate(trainingX);
-                    double error = Y[t] - output;
+                    if (j == 0) W[i]= new List<double>(trainingX[i].Count+1);
+                    W[i][j] = rand.NextDouble();
+                }
+            }
+            trainingErrors.Clear();
+            trainedError = double.MaxValue;
+        }
+        public void TrainToBias(double biasToleration, long maxIterations)
+        {
+            if (biasToleration <= 0)
+                throw new ArgumentException("Złożoność tolerancji mniejsza lub równa 0");
+            if (maxIterations <= 0)
+                throw new ArgumentException("Maksymalna liczba iteracji mniejsza lub równa 0");
 
-                    if (error == 0)
-                        W[t + 1] = W[t];
-                    else
-                        W[t + 1] = W[t] + trainingX[t] * trainingY[t];
+            while (trainedError > biasToleration || maxIterations<0)
+            {
+                maxIterations--;
+                double sumSquaredError = 0.0;
+                for (int t = 0; t < trainingX.Count; t++)
+                {
+                    double output = Calculate(trainingX[t].ToArray(), t);
+                    double error = trainingD[t] - output;
+
+                    if (!(error == 0))
+                        for(int i = 0; i < trainingX[t].Count; i++)
+                        W[t][i] = W[t][i] + trainingX[t][i] * trainingD[t];
 
                     sumSquaredError += error * error;
                 }
 
-                trainedError = sumSquaredError / trainingX.Length;
+                trainedError = sumSquaredError / trainingX.Count;
                 trainingErrors.Add(trainedError); // ZAPIS DO HISTORII
             }
+        }
+        public void TrainToIterations(long maxIterations)
+        {
+            if (maxIterations <= 0)
+                throw new ArgumentException("Maksymalna liczba iteracji mniejsza lub równa 0");
 
-            return trainedError;
+            while (maxIterations < 0)
+            {
+                maxIterations--;
+                double sumSquaredError = 0.0;
+                for (int t = 0; t < trainingX.Count; t++)
+                {
+                    double output = Calculate(trainingX[t].ToArray(), t);
+                    double error = trainingD[t] - output;
+
+                    if (!(error == 0))
+                        for (int i = 0; i < trainingX[t].Count; i++)
+                            W[t][i] = W[t][i] + trainingX[t][i] * trainingD[t];
+
+                    sumSquaredError += error * error;
+                }
+
+                trainedError = sumSquaredError / trainingX.Count;
+                trainingErrors.Add(trainedError); // ZAPIS DO HISTORII
+            }
+        }
+        public void SingleIterationTrain()
+        {
+            double sumSquaredError = 0.0;
+            for (int t = 0; t < trainingX.Count; t++)
+            {
+                double output = Calculate(trainingX[t].ToArray(), t);
+                double error = trainingD[t] - output;
+
+                if (!(error == 0))
+                    for (int i = 0; i < trainingX[t].Count; i++)
+                        W[t][i] = W[t][i] + trainingX[t][i] * trainingD[t];
+
+                sumSquaredError += error * error;
+            }
+
+            trainedError = sumSquaredError / trainingX.Count;
+            trainingErrors.Add(trainedError);
         }
 
         public double Test()
         {
             double sumSquaredError = 0.0;
-            for (int t = 0; t < testingX.Length; t++)
+            for (int t = 0; t < testingX.Count; t++)
             {
-                double output = Calculate(testingX);
-                double error = testingY[t] - output;
+                double output = Calculate(testingX[t].ToArray(), t);
+                double error = testingD[t] - output;
                 sumSquaredError += error * error;
             }
-            return sumSquaredError / testingX.Length;
+            return sumSquaredError / testingX.Count;
         }
-        public double Calculate(double[] X)
+        public double Calculate(double[] X, int index)
         {
-            double sum = 1*w0;
+            double sum = W[index][0];
             for (int i = 0; i < X.Length; i++)
             {
-                sum += X[i] * W[i];
+                sum += X[i] * W[index][i];
             }
             return ActivationFunction(sum);
         }
@@ -117,14 +164,14 @@ namespace Nauron.Models
         {
             this.func = func;
         }
-        public void newData(double[] trainingX, double[] trainingY, double[] testingX, double[] testingY)
+        public void newData(List<List<double>> trainingX, double[] trainingD, List<List<double>> testingX, double[] testingD)
         {
             this.trainingX = trainingX;
             this.testingX = testingX;
-            this.trainingY = trainingY;
-            this.testingY = testingY;
+            this.trainingD = trainingD;
+            this.testingD = testingD;
         }
-        public double[] GetWeights()
+        public List<List<double>> GetWeights()
         {
             return W;
         }

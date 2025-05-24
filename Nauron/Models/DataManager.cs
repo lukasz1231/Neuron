@@ -10,7 +10,7 @@ namespace Nauron.Models
 {
     internal class DataManager
     {
-        public (double[] trainingX, double[] trainingY, double[] testingX, double[] testingY)
+        public (List<List<double>> trainingX, double[] trainingD, List<List<double>> testingX, double[] testingD)
             LoadData(string fileName, double trainPercent)
         {
             string filePath = Path.Combine("../../../Data/", fileName);
@@ -21,20 +21,25 @@ namespace Nauron.Models
             if (trainPercent <= 0 || trainPercent >= 1)
                 throw new ArgumentException("trainPercent musi być liczbą z przedziału (0, 1).");
 
-            var allData = new List<(double x, double y)>();
+            var allData = new List<(List<double> x, double d)>();
             var lines = File.ReadAllLines(filePath);
             var culture = CultureInfo.InvariantCulture;
-
+            var stack = new Stack<double>();
+            double d;
             foreach (var line in lines)
             {
                 var parts = line.Trim().Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
-                if (parts.Length != 2) continue;
-
-                if (double.TryParse(parts[0], NumberStyles.Any, culture, out var x) &&
-                    double.TryParse(parts[1], NumberStyles.Any, culture, out var y))
+                if (parts.Length < 2) continue;
+                stack.Clear();
+                foreach(string s in parts)
                 {
-                    allData.Add((x, y));
+                    if(double.TryParse(s, NumberStyles.Any, culture, out var wart))
+                    {
+                        stack.Push(wart);
+                    }
                 }
+                d=stack.Pop();
+                allData.Add((stack.ToList(), d));
             }
 
             var rand = new Random();
@@ -45,12 +50,12 @@ namespace Nauron.Models
             var trainingData = allData.Take(trainCount).ToArray();
             var testingData = allData.Skip(trainCount).ToArray();
 
-            double[] trainingX = trainingData.Select(d => d.x).ToArray();
-            double[] trainingY = trainingData.Select(d => d.y).ToArray();
-            double[] testingX = testingData.Select(d => d.x).ToArray();
-            double[] testingY = testingData.Select(d => d.y).ToArray();
+            List<List<double>> trainingX = trainingData.Select(d => d.x).ToList();
+            double[] trainingD = trainingData.Select(d => d.d).ToArray();
+            List<List<double>> testingX = testingData.Select(d => d.x).ToList();
+            double[] testingD = testingData.Select(d => d.d).ToArray();
 
-            return (trainingX, trainingY, testingX, testingY);
+            return (trainingX, trainingD, testingX, testingD);
         }
 
         // Przykładowa metoda do zapisu danych lub wag do pliku

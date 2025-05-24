@@ -18,10 +18,10 @@ namespace Nauron
     /// </summary>
     public partial class MainWindow : Window
     {
-        double[] trainingX;
-        double[] trainingY;
-        double[] testingX;
-        double[] testingY;
+        List<List<double>> trainingX;
+        double[] trainingD;
+        List<List<double>> testingX;
+        double[] testingD;
         FunctionSelector fs;
         Neuron neuron;
         DataManager dataManager;
@@ -44,7 +44,7 @@ namespace Nauron
                 {
                     Width = 6,
                     Height = 6,
-                    Fill = trainingY[i] > 0 ? Brushes.Green : Brushes.Red
+                    Fill = trainingD[i] > 0 ? Brushes.Green : Brushes.Red
                 };
 
                 Canvas.SetLeft(point, x - 3);
@@ -98,7 +98,7 @@ namespace Nauron
             string fileName = FileNameBox.Text.Trim();
             try
             {
-                (trainingX, trainingY, testingX, testingY) = dataManager.LoadData(fileName, 0.7);
+                (trainingX, trainingD, testingX, testingD) = dataManager.LoadData(fileName, 0.7);
             }
             catch(FileNotFoundException ex)
             {
@@ -110,9 +110,9 @@ namespace Nauron
                 MessageBox.Show(ex.Message);
                 return;
             }
-            neuron.newData(trainingX, trainingY, testingX, testingY);
-            int maxEpochs = int.Parse(MaxIterBox.Text.Trim());
-            double error = neuron.Train(trainingX, trainingY, maxEpochs);
+            neuron.newData(trainingX, trainingD, testingX, testingD);
+            long maxEpochs = long.Parse(MaxIterBox.Text.Trim());
+            double error = neuron.Train(trainingX, trainingD, maxEpochs);
 
             ErrorText.Text = $"Trained with error: {error:F4}";
 
@@ -181,8 +181,8 @@ namespace Nauron
             // Przeskalowanie wartości dla osi X i Y
             double xMin = trainingX.Min();
             double xMax = trainingX.Max();
-            double yMin = trainingY.Min();
-            double yMax = trainingY.Max();
+            double yMin = trainingD.Min();
+            double yMax = trainingD.Max();
 
             // Rysowanie etykiet na osi X (co 1 jednostka)
             for (int i = (int)xMin; i <= xMax; i++)
@@ -236,10 +236,10 @@ namespace Nauron
             fs = new FunctionSelector(this);
             Loaded += fs.FunctionSelector_Loaded;
             dataManager = new DataManager();
-            (trainingX, trainingY, testingX, testingY) = dataManager.LoadData("data1.txt", 0.7);
-            neuron = new Perceptron(trainingX, trainingY, testingX, testingY, 0.1, 1);
+            (trainingX, trainingD, testingX, testingD) = dataManager.LoadData("data1.txt", 0.7);
+            neuron = new Perceptron(trainingX, trainingD, testingX, testingD, 0.1, 1);
             int maxEpochs = int.Parse(MaxIterBox.Text.Trim());
-            double error = neuron.Train(trainingX, trainingY, maxEpochs);
+            double error = neuron.Train(trainingX, trainingD, maxEpochs);
 
             ErrorText.Text = $"Trained with error: {error:F4}, Prosta: {GetEquation()}";
 
