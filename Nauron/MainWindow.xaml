@@ -23,9 +23,6 @@
 
 
         <Canvas Name="PlotCanvas" Background="GhostWhite" Margin="10" Grid.Row="1"/>
-        <StackPanel Orientation="Horizontal" Margin="10" Grid.Row="1" VerticalAlignment="Top">
-            <TextBlock x:Name="FileNameBoxError" Text="" Width="150"/>
-        </StackPanel>
         <Canvas Name="ErrorPlotCanvas" Background="GhostWhite" Margin="10" Grid.Row="2"/>
     </Grid>
 </Window>

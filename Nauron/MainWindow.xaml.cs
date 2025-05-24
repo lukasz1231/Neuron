@@ -81,37 +81,29 @@ namespace Nauron
 
         private void TrainButton_Click(object sender, RoutedEventArgs e)
         {
+            string fileName = FileNameBox.Text.Trim();
             try
             {
-                FileNameBoxError.Text= "";
-                string fileName = FileNameBox.Text.Trim();
-                try
-                {
-                    (trainingX, trainingY, testingX, testingY) = dataManager.LoadData(fileName, 0.7);
-                }
-                catch(FileNotFoundException ex)
-                {
-                    FileNameBoxError.Text= ex.Message;
-                    return;
-                }
-                catch(ArgumentException ex)
-                {
-                    FileNameBoxError.Text= ex.Message;
-                    return;
-                }
-                perceptron.newData(trainingX, trainingY, testingX, testingY);
-                int maxEpochs = int.Parse(MaxIterBox.Text.Trim());
-                double error = perceptron.Train(trainingX, trainingY, maxEpochs);
-
-                ErrorText.Text = $"Trained with error: {error:F4}";
-
-                DrawData();
-                DrawDecisionBoundary();
+                (trainingX, trainingY, testingX, testingY) = dataManager.LoadData(fileName, 0.7);
             }
-            catch (Exception ex)
+            catch(FileNotFoundException ex)
             {
-                MessageBox.Show("Błąd podczas wczytywania danych lub treningu:\n" + ex.Message);
+                MessageBox.Show(ex.Message);
+                return;
             }
+            catch(ArgumentException ex)
+            {
+                MessageBox.Show(ex.Message);
+                return;
+            }
+            perceptron.newData(trainingX, trainingY, testingX, testingY);
+            int maxEpochs = int.Parse(MaxIterBox.Text.Trim());
+            double error = perceptron.Train(trainingX, trainingY, maxEpochs);
+
+            ErrorText.Text = $"Trained with error: {error:F4}";
+
+            DrawData();
+            DrawDecisionBoundary();
         }
 
         private void DrawErrorPlot(List<double> errors)
