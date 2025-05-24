@@ -63,6 +63,34 @@ namespace Nauron
                     Canvas.SetTop(point, y);
                         PlotCanvas.Children.Add(point);
             }
+            var W = neuron.GetWeights();
+            for(int i=0;i<W.Count; i++)
+            {
+                if (W[i][0] > maxX)
+                    maxX = W[i][0];
+                if (W[i][0] < minX)
+                    minX = W[i][0];
+                if (W[i][1] > maxY)
+                    maxY = W[i][1];
+                if (W[i][1] < minY)
+                    minY = W[i][1];
+            }
+            for (int i = 0; i < trainingX.Count; i++)
+            {
+                double x = Normalize(W[i][0], minX, maxX, 10, width - 10);
+                double y = Normalize(W[i][1], minY, maxY, 10, height - 10);
+
+                Ellipse point = new Ellipse
+                {
+                    Width = 6,
+                    Height = 6,
+                    Fill = Brushes.Violet
+                };
+
+                Canvas.SetLeft(point, x);
+                Canvas.SetTop(point, y);
+                PlotCanvas.Children.Add(point);
+            }
         }
 
         private void DrawDecisionBoundary()
@@ -71,10 +99,10 @@ namespace Nauron
             double height = PlotCanvas.ActualHeight;
 
             List<List<double>> weights = neuron.GetWeights();
-            if (weights.Count<2 || weights[1][0]==0)
+            if (weights.Count<2 || weights[0][1]==0)
                 return; // brak dzielenia przez zero lub brakujących danych
 
-            double thresholdX = -weights[0][0] / weights[1][0];
+            double thresholdX = -weights[0][0] / weights[0][1];
 
             double max = 0, min = double.MaxValue;
             for (int i = 0; i < trainingX.Count; i++)
@@ -85,14 +113,14 @@ namespace Nauron
                     min = trainingX[i].Min();
             }
 
-            double x = Normalize(thresholdX, min, max, 10, width - 10);
+            double x = Normalize(trainingX[0][0], min, max, 10, width - 10);
 
             Line line = new Line
             {
-                X1 = x,
-                Y1 = 0,
-                X2 = x,
-                Y2 = height,
+                X1 = 0,
+                Y1 = x,
+                X2 = width,
+                Y2 = -(x * weights[0][0]) / weights[0][1],
                 Stroke = Brushes.Blue,
                 StrokeThickness = 2,
                 StrokeDashArray = new DoubleCollection { 2 }
@@ -138,8 +166,8 @@ namespace Nauron
         {
             string fileName = FileNameBox.Text.Trim();
             double error;
-            try
-            {
+            //try
+            //{
                 (trainingX, trainingD, testingX, testingD) = dataManager.LoadData(fileName, double.Parse(UlamekTestowych.Text));
                 neuron.newData(trainingX, trainingD, testingX, testingD);
                 if (CheckboxErr.IsChecked ?? false){
@@ -154,17 +182,17 @@ namespace Nauron
                     MessageBox.Show("Wybrano niepoprawny tryb trenowania");
                     return;
             }
-        }
-            catch (ArgumentException ex)
-            {
-                MessageBox.Show(ex.Message);
-                return;
-            }
-            catch (FileNotFoundException ex)
-            {
-                MessageBox.Show(ex.Message);
-                return;
-            }
+        //}
+        //    catch (ArgumentException ex)
+        //    {
+        //        MessageBox.Show(ex.Message);
+        //        return;
+        //    }
+        //    catch (FileNotFoundException ex)
+        //    {
+        //        MessageBox.Show(ex.Message);
+        //        return;
+        //    }
             ErrorText.Content = $"Trained with error: {error:F4}";
             DrawData();
             DrawDecisionBoundary();
