@@ -15,7 +15,7 @@ namespace Nauron.Models
         List<List<double>> W;
         double trainedError;
         int func;
-        List<double> trainingErrors = new List<double>();
+        List<double> trainingErrors;
         Random rand;
         public Perceptron(List<List<double>> trainingX, double[] trainingD, List<List<double>> testingX, double[] testingD, int func) {
             this.trainingX = trainingX;
@@ -24,6 +24,7 @@ namespace Nauron.Models
             this.testingX = testingX;
             this.func = func;
             this.W = new List<List<double>>(trainingX.Count);
+            trainingErrors = new List<double>();
             rand = new Random();
         }
         public void InitTrain()
@@ -48,7 +49,7 @@ namespace Nauron.Models
                 throw new ArgumentException("Maksymalna liczba iteracji mniejsza lub równa 0");
             if (W[0] == null)
                 InitTrain();
-            while (trainedError > biasToleration || maxIterations<0)
+            while (trainedError > biasToleration && maxIterations>=0)
             {
                 maxIterations--;
                 double sumSquaredError = 0.0;
@@ -76,7 +77,7 @@ namespace Nauron.Models
             if (W[0] == null)
                 InitTrain();
 
-            while (maxIterations < 0)
+            while (maxIterations >= 0)
             {
                 maxIterations--;
                 double sumSquaredError = 0.0;
@@ -181,7 +182,9 @@ namespace Nauron.Models
         {
             return W;
         }
-        public List<double> GetTrainingErrors() => trainingErrors;
+        public List<double> GetTrainingErrors(){
+            return trainingErrors;
+        }
 
     }
 }

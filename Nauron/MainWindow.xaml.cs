@@ -122,10 +122,10 @@ namespace Nauron
             double error;
             try
             {
-                (trainingX, trainingD, testingX, testingD) = dataManager.LoadData(fileName, Convert.ToDouble(UlamekTestowych.Text));
+                (trainingX, trainingD, testingX, testingD) = dataManager.LoadData(fileName, double.Parse(UlamekTestowych.Text));
                 neuron.newData(trainingX, trainingD, testingX, testingD);
                 if (CheckboxErr.IsChecked ?? false){
-                    error = neuron.TrainToBias(Convert.ToDouble(MaxErrorBox.Text), Convert.ToInt64(MaxIterBox.Text));
+                    error = neuron.TrainToBias(double.Parse(MaxErrorBox.Text), Convert.ToInt64(MaxIterBox.Text));
                 }
                 else if (CheckboxIter.IsChecked ?? false)
                     error = neuron.TrainToIterations(Convert.ToInt64(MaxIterBox.Text));
@@ -177,6 +177,7 @@ namespace Nauron
 
             double width = ErrorPlotCanvas.ActualWidth;
             double height = ErrorPlotCanvas.ActualHeight;
+
 
             double maxError = errors.Max();
 

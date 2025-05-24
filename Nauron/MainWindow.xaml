@@ -24,16 +24,16 @@
         <StackPanel Orientation="Horizontal" Margin="10" Grid.Row="1" VerticalAlignment="Top">
             <TextBox x:Name="FileNameBox" Width="150" Text="data1.txt"/>
             <Button Content="Funckja" Margin="10,0,10,0" Click="FunctionButton_Click"/>
-            <TextBox x:Name="MaxErrorBox" Width="80" Text="0.1" Margin="0,0,10,0" ToolTip="Maksymalny błąd"/>
+            <TextBox x:Name="MaxErrorBox" Width="80" Text="0,1" Margin="0,0,10,0" ToolTip="Maksymalny błąd"/>
             <TextBox x:Name="MaxIterBox" Width="80" Text="100" Margin="30,0,10,0" ToolTip="Maksymalna liczba iteracji"/>
             <Button Content="Trenuj na nowo" Click="InitButton_Click"/>
             <Button Content="Trenuj" Click="TrainButton_Click" Margin="30,0,10,0"/>
             <Label Content="Część danych testowych" Margin="10,0,10,0"></Label>
             <TextBox x:Name="UlamekTestowych" Width="80" Text="0,7" ToolTip="Ułamek wyznaczający podział danych"/>
         </StackPanel>
-        <TextBlock x:Name="ErrorText" Text="" FontWeight="Bold" Grid.Row="2"/>
 
         <Canvas Name="PlotCanvas" Background="GhostWhite" Margin="10" Grid.Row="2"/>
+        <TextBlock x:Name="ErrorText" Text="" FontWeight="Bold" Margin="10" Grid.Row="2"/>
         <Canvas Name="ErrorPlotCanvas" Background="GhostWhite" Margin="10" Grid.Row="3"/>
     </Grid>
 </Window>
