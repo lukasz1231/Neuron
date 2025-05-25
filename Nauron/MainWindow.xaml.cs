@@ -80,7 +80,7 @@ namespace Nauron
             else
             {
                 yMin = Math.Floor(neuron.GetTrainingErrors().Min());
-                yMax = Math.Round(neuron.GetTrainingErrors().Max());
+                yMax = Math.Ceiling(neuron.GetTrainingErrors().Max());
             }
 
 
@@ -186,12 +186,6 @@ namespace Nauron
             double height = PlotCanvas.ActualHeight;
             (trainingX, trainingD, testingX, testingD) = neuron.GetData();
 
-            //List<List<double>> weights = neuron.GetWeights();
-            //if (weights.Count<2 || weights[0][1]==0)
-            //    return; // brak dzielenia przez zero lub brakujących danych
-
-            //double thresholdX = -weights[0][0] / weights[0][1];
-
             double maxX = 0, minX = double.MaxValue, maxY = 0, minY = double.MaxValue;
             double wynik = 0;
             for (int i = 0; i < trainingX.Count; i++)
@@ -232,7 +226,7 @@ namespace Nauron
             double height = ErrorPlotCanvas.ActualHeight;
 
 
-            double maxError = errors.Max();
+            double maxError = Math.Ceiling(errors.Max());
 
             Polyline polyline = new Polyline
             {
@@ -243,7 +237,7 @@ namespace Nauron
             for (int i = 0; i < errors.Count; i++)
             {
                 double x = (i / ( errors.Count-1.0)) * (width - 20) + 10;
-                double y = (errors[i] / maxError) * (height - 20) + 10;
+                double y = (height-(errors[i] / maxError) * (height - 20)) + 10;
                 polyline.Points.Add(new Point(x, y));
                 if (errors.Count == 1)
                 {

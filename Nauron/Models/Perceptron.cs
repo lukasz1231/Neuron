@@ -13,7 +13,7 @@ namespace Nauron.Models
         List<List<double>> testingX;
         double[] testingD;
         double[] W;
-        double[] w0;
+        double w0;
         double trainedError;
         int func;
         List<double> trainingErrors;
@@ -25,13 +25,12 @@ namespace Nauron.Models
         }
         public void InitTrain()
         {
-            W = new double[trainingX.Count];
-            w0=new double[trainingX.Count];
-            for (int i = 0; i < trainingX.Count; i++)
-            {
-                W[i] = rand.Next(1,11)+(rand.Next(2,30)*rand.NextDouble())/Math.Pow(10,rand.Next(2,10));
-                w0[i] = rand.NextDouble();
-            }
+            W = new double[2];
+            W[0] = rand.Next(1,11)+(rand.Next(2,30)*rand.NextDouble())/Math.Pow(10,rand.Next(2,10));
+            W[1] = rand.Next(1,11)+(rand.Next(2,30)*rand.NextDouble())/Math.Pow(10,rand.Next(2,10));
+
+            w0 = rand.NextDouble();
+
             trainingErrors.Clear();
             trainedError = double.MaxValue;
         }
@@ -72,7 +71,7 @@ namespace Nauron.Models
 
                 if (error != 0)
                     for (int i = 0; i < trainingX[t].Count; i++)
-                        W[t] = W[t] + trainingX[t][i] * error;
+                        W[i] = W[i] + trainingX[t][i] * error;
 
                 sumSquaredError += error * error;
             }
@@ -83,10 +82,10 @@ namespace Nauron.Models
         }
         public double Calculate(int index)
         {
-            double sum = w0[index];
+            double sum = w0;
             for (int i = 0; i < trainingX[index].Count; i++)
             {
-                sum += trainingX[index][i] * W[index];
+                sum += trainingX[index][i] * W[i];
             }
             return ActivationFunction(sum);
         }
