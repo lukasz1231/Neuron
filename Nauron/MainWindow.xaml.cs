@@ -227,6 +227,7 @@ namespace Nauron
 
 
             double maxError = Math.Ceiling(errors.Max());
+            double minError = Math.Floor(errors.Min());
 
             Polyline polyline = new Polyline
             {
@@ -237,7 +238,7 @@ namespace Nauron
             for (int i = 0; i < errors.Count; i++)
             {
                 double x = (i / ( errors.Count-1.0)) * (width - 20) + 10;
-                double y = (height-(errors[i] / maxError) * (height - 20)) + 10;
+                double y = Normalize(errors[i],minError,maxError,height-10,10);
                 polyline.Points.Add(new Point(x, y));
                 if (errors.Count == 1)
                 {
