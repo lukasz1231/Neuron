@@ -288,8 +288,8 @@ namespace Nauron
         private void TrainButton_Click(object sender, RoutedEventArgs e)
         {
             double error;
-            //try
-            //{
+            try
+            {
                 if (CheckboxErr.IsChecked ?? false){
                     error = neuron.TrainToBias(double.Parse(MaxErrorBox.Text), long.Parse(MaxIterBox.Text));
                 }
@@ -301,18 +301,18 @@ namespace Nauron
                 {
                     MessageBox.Show("Wybrano niepoprawny tryb trenowania");
                     return;
+                }
             }
-        //}
-        //    catch (ArgumentException ex)
-        //    {
-        //        MessageBox.Show(ex.Message);
-        //        return;
-        //    }
-        //    catch (FileNotFoundException ex)
-        //    {
-        //        MessageBox.Show(ex.Message);
-        //        return;
-        //    }
+            catch (ArgumentException ex)
+            {
+                MessageBox.Show(ex.Message);
+                return;
+            }
+            catch (FileNotFoundException ex)
+            {
+                MessageBox.Show(ex.Message);
+                return;
+            }
             ErrorText.Content = $"Trained with error: {error:F4}";
             DrawData();
             DrawDecisionBoundary();

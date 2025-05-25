@@ -32,10 +32,10 @@ namespace Nauron.Models
             w0 = rand.NextDouble();
 
             trainingErrors.Clear();
-            trainedError = double.MaxValue;
         }
         public double TrainToBias(double biasToleration, long maxIterations)
         {
+            trainedError = double.MaxValue;
             if (biasToleration <= 0)
                 throw new ArgumentException("Złożoność tolerancji mniejsza lub równa 0");
             if (maxIterations <= 0)
