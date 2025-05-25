@@ -12,10 +12,10 @@ interface Neuron
     public double SingleIterationTrain();
 
     public double Test();
-    public double Calculate(double[] X, int index);
+    public double Calculate(int index);
     public void ChangeFunction(int func);
     public void newData(List<List<double>> trainingX, double[] trainingD, List<List<double>> testingX, double[] testingD);
     public List<List<double>> GetWeights();
     public List<double> GetTrainingErrors();
-
+    public (List<List<double>> trainingX, double[] trainingD, List<List<double>> testingX, double[] testingD) GetData();
 }

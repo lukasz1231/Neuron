@@ -20,7 +20,7 @@ namespace Nauron.Models
             }
             if (trainPercent <= 0 || trainPercent >= 1)
                 throw new ArgumentException("trainPercent musi być liczbą z przedziału (0, 1).");
-
+            trainPercent = 1;
             var allData = new List<(List<double> x, double d)>();
             var lines = File.ReadAllLines(filePath);
             var culture = CultureInfo.InvariantCulture;

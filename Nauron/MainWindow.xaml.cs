@@ -33,6 +33,7 @@ namespace Nauron
             PlotCanvas.Children.Clear();
             DrawAxesWithLabels(PlotCanvas); // Dodanie osi z etykietami
 
+            (trainingX, trainingD, testingX, testingD) = neuron.GetData();
             double width = PlotCanvas.ActualWidth;
             double height = PlotCanvas.ActualHeight;
             double maxX=0, minX=double.MaxValue, maxY = 0, minY = double.MaxValue;
@@ -63,22 +64,18 @@ namespace Nauron
                     Canvas.SetTop(point, y);
                         PlotCanvas.Children.Add(point);
             }
-            var W = neuron.GetWeights();
-            for(int i=0;i<W.Count; i++)
+            for(int i=0;i< trainingX.Count; i++)
             {
-                if (W[i][0] > maxX)
-                    maxX = W[i][0];
-                if (W[i][0] < minX)
-                    minX = W[i][0];
-                if (W[i][1] > maxY)
-                    maxY = W[i][1];
-                if (W[i][1] < minY)
-                    minY = W[i][1];
+                var wynik = neuron.Calculate(i);
+                if (wynik > maxY)
+                    maxY = wynik;
+                if (wynik < minY)
+                    minY = wynik;
             }
             for (int i = 0; i < trainingX.Count; i++)
             {
-                double x = Normalize(W[i][0], minX, maxX, 10, width - 10);
-                double y = Normalize(W[i][1], minY, maxY, 10, height - 10);
+                double x = Normalize(trainingX[i][0], minX, maxX, 10, width - 10);
+                double y = Normalize(neuron.Calculate(i), minY, maxY, 10, height - 10);
 
                 Ellipse point = new Ellipse
                 {
@@ -97,36 +94,48 @@ namespace Nauron
         {
             double width = PlotCanvas.ActualWidth;
             double height = PlotCanvas.ActualHeight;
+            (trainingX, trainingD, testingX, testingD) = neuron.GetData();
 
-            List<List<double>> weights = neuron.GetWeights();
-            if (weights.Count<2 || weights[0][1]==0)
-                return; // brak dzielenia przez zero lub brakujących danych
+            //List<List<double>> weights = neuron.GetWeights();
+            //if (weights.Count<2 || weights[0][1]==0)
+            //    return; // brak dzielenia przez zero lub brakujących danych
 
-            double thresholdX = -weights[0][0] / weights[0][1];
+            //double thresholdX = -weights[0][0] / weights[0][1];
 
-            double max = 0, min = double.MaxValue;
+            double maxX = 0, minX = double.MaxValue, maxY = 0, minY = double.MaxValue;
+            double wynik = 0;
             for (int i = 0; i < trainingX.Count; i++)
             {
-                if (trainingX[i].Max() > max)
-                    max = trainingX[i].Max();
-                if (trainingX[i].Min() < min)
-                    min = trainingX[i].Min();
+                if (trainingX[i][0] > maxX)
+                    maxX = trainingX[i][0];
+                if (trainingX[i][0] < minX)
+                    minX = trainingX[i][0];
+                wynik = neuron.Calculate(i);
+                if(wynik > maxY)
+                    maxY = wynik;
+                if(wynik < minY)
+                    minY = wynik;
             }
-
-            double x = Normalize(trainingX[0][0], min, max, 10, width - 10);
-
-            Line line = new Line
+            double x, y, x2, y2;
+            for (int i = 0; i < trainingX.Count-1; i++)
             {
-                X1 = 0,
-                Y1 = x,
-                X2 = width,
-                Y2 = -(x * weights[0][0]) / weights[0][1],
-                Stroke = Brushes.Blue,
-                StrokeThickness = 2,
-                StrokeDashArray = new DoubleCollection { 2 }
-            };
+                    x = Normalize(trainingX[i][0], minX, maxX, 10, width - 10);
+                    y = Normalize(neuron.Calculate(i), minY, maxY, 10, height - 10);
+                    x2 = Normalize(trainingX[i+1][0], minX, maxX, 10, width - 10);
+                    y2 = Normalize(neuron.Calculate(i + 1), minY, maxY, 10, height - 10);
 
+                    Line line = new Line
+                    {
+                        X1 = x,
+                        Y1 = y,
+                        X2 = x2,
+                        Y2 = y2,
+                        Stroke = Brushes.Blue,
+                        StrokeThickness = 2,
+                        StrokeDashArray = new DoubleCollection { 2 }
+                    };
             PlotCanvas.Children.Add(line);
+            }
         }
         private void FunctionButton_Click(object sender, RoutedEventArgs e)
         {
@@ -168,8 +177,6 @@ namespace Nauron
             double error;
             //try
             //{
-                (trainingX, trainingD, testingX, testingD) = dataManager.LoadData(fileName, double.Parse(UlamekTestowych.Text));
-                neuron.newData(trainingX, trainingD, testingX, testingD);
                 if (CheckboxErr.IsChecked ?? false){
                     error = neuron.TrainToBias(double.Parse(MaxErrorBox.Text), Convert.ToInt64(MaxIterBox.Text));
                 }
@@ -196,7 +203,7 @@ namespace Nauron
             ErrorText.Content = $"Trained with error: {error:F4}";
             DrawData();
             DrawDecisionBoundary();
-            DrawErrorPlot(neuron.GetTrainingErrors());
+            DrawErrorPlot();
         }
         public void ChangeTrainingModeSingle(object sender, RoutedEventArgs e)
         {
@@ -213,10 +220,11 @@ namespace Nauron
             CheckboxSingle.IsChecked= false;
             CheckboxIter.IsChecked= false;
         }
-        private void DrawErrorPlot(List<double> errors)
+        private void DrawErrorPlot()
         {
             ErrorPlotCanvas.Children.Clear();
             DrawAxesWithLabels(ErrorPlotCanvas, false); // Dodanie osi z etykietami
+            var errors=neuron.GetTrainingErrors();
 
             if (errors.Count < 2) return;
 
@@ -244,6 +252,7 @@ namespace Nauron
 
         private void DrawAxesWithLabels(Canvas canvas, bool withX=true)
         {
+            (trainingX, trainingD, testingX, testingD) = neuron.GetData();
             double width = canvas.ActualWidth;
             double height = canvas.ActualHeight;
 
@@ -320,6 +329,8 @@ namespace Nauron
 
         private double Normalize(double value, double min, double max, double targetMin, double targetMax)
         {
+            if (min == max)
+                max++;
             return targetMin + (value - min) / (max - min) * (targetMax - targetMin);
         }
 

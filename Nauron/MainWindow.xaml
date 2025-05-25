@@ -25,8 +25,8 @@
             <TextBox x:Name="FileNameBox" Width="150" Text="data1.txt"/>
             <Button Content="Funckja" Margin="10,0,10,0" Click="FunctionButton_Click"/>
             <TextBox x:Name="MaxErrorBox" Width="80" Text="0,1" Margin="0,0,10,0" ToolTip="Maksymalny błąd"/>
-            <TextBox x:Name="MaxIterBox" Width="80" Text="100" Margin="30,0,10,0" ToolTip="Maksymalna liczba iteracji"/>
-            <Button Content="Trenuj na nowo" Click="InitButton_Click"/>
+            <TextBox x:Name="MaxIterBox" Width="80" Text="100" Margin="30,0,40,0" ToolTip="Maksymalna liczba iteracji"/>
+            <Button Content="Inicjalizuj dane" Click="InitButton_Click"/>
             <Button Content="Trenuj" Click="TrainButton_Click" Margin="30,0,10,0"/>
             <Label Content="Część danych treningowych" Margin="10,0,2,0"></Label>
             <TextBox x:Name="UlamekTestowych" Width="28" Text="0,7" ToolTip="Ułamek wyznaczający podział danych"/>

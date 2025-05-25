@@ -13,6 +13,7 @@ namespace Nauron.Models
         List<List<double>> testingX;
         double[] testingD;
         List<List<double>> W;
+        double[] w0;
         double trainedError;
         int func;
         List<double> trainingErrors;
@@ -24,13 +25,15 @@ namespace Nauron.Models
         public void InitTrain()
         {
             W.Clear();
+            w0=new double[trainingX.Count];
             for (int i = 0; i < trainingX.Count; i++)
             {
                 for (int j = 0; j < trainingX[i].Count; j++)
                 {
                     if (j == 0) W.Add(new List<double>(trainingX[i].Count));
-                    W[i].Add(rand.NextDouble());
+                    W[i].Add(rand.Next(1,11)+rand.Next(1000,100000)*rand.NextDouble());
                 }
+                w0[i] = rand.NextDouble();
             }
             trainingErrors.Clear();
             trainedError = double.MaxValue;
@@ -42,25 +45,11 @@ namespace Nauron.Models
             if (maxIterations <= 0)
                 throw new ArgumentException("Maksymalna liczba iteracji mniejsza lub równa 0");
             if (W.Count == 0)
-                InitTrain();
+                throw new ArgumentException("Nie zainicjalizowano danych");
             while (trainedError > biasToleration && maxIterations>=0)
             {
                 maxIterations--;
-                double sumSquaredError = 0.0;
-                for (int t = 0; t < trainingX.Count; t++)
-                {
-                    double output = Calculate(trainingX[t].ToArray(), t);
-                    double error = trainingD[t] - output;
-
-                    if (!(error == 0))
-                        for(int i = 0; i < trainingX[t].Count; i++)
-                        W[t][i] = W[t][i] + trainingX[t][i] * error;
-
-                    sumSquaredError += error * error;
-                }
-
-                trainedError = sumSquaredError / trainingX.Count;
-                trainingErrors.Add(trainedError); // ZAPIS DO HISTORII
+                SingleIterationTrain();
             }
             return trainedError;
         }
@@ -69,42 +58,28 @@ namespace Nauron.Models
             if (maxIterations <= 0)
                 throw new ArgumentException("Maksymalna liczba iteracji mniejsza lub równa 0");
             if (W.Count == 0)
-                InitTrain();
+                throw new ArgumentException("Nie zainicjalizowano danych");
 
             while (maxIterations >= 0)
             {
                 maxIterations--;
-                double sumSquaredError = 0.0;
-                for (int t = 0; t < trainingX.Count; t++)
-                {
-                    double output = Calculate(trainingX[t].ToArray(), t);
-                    double error = trainingD[t] - output;
-
-                    if (!(error == 0))
-                        for (int i = 0; i < trainingX[t].Count; i++)
-                            W[t][i] = W[t][i] + trainingX[t][i] * error;
-
-                    sumSquaredError += error * error;
-                }
-
-                trainedError = sumSquaredError / trainingX.Count;
-                trainingErrors.Add(trainedError); // ZAPIS DO HISTORII
+                SingleIterationTrain();
             }
             return trainedError;
         }
         public double SingleIterationTrain()
         {
             if (W.Count==0)
-                InitTrain();
+                throw new ArgumentException("Nie zainicjalizowano danych");
             double sumSquaredError = 0.0;
             for (int t = 0; t < trainingX.Count; t++)
             {
-                double output = Calculate(trainingX[t].ToArray(), t);
+                double output = Calculate(t);
                 double error = trainingD[t] - output;
 
-                if (!(error == 0))
+                if (error != 0)
                     for (int i = 0; i < trainingX[t].Count; i++)
-                        W[t][i] = W[t][i] + trainingX[t][i] * error;
+                        W[(int)trainingD[t]][i] = W[(int)trainingD[t]][i] + trainingX[t][i] * error;
 
                 sumSquaredError += error * error;
             }
@@ -119,18 +94,18 @@ namespace Nauron.Models
             double sumSquaredError = 0.0;
             for (int t = 0; t < testingX.Count; t++)
             {
-                double output = Calculate(testingX[t].ToArray(), t);
+                double output = Calculate(t);
                 double error = testingD[t] - output;
                 sumSquaredError += error * error;
             }
             return sumSquaredError / testingX.Count;
         }
-        public double Calculate(double[] X, int index)
+        public double Calculate(int index)
         {
-            double sum = W[index][0];
-            for (int i = 0; i < X.Length; i++)
+            double sum = w0[0];
+            for (int i = 0; i < trainingX[index].Count; i++)
             {
-                sum += X[i] * W[index][i];
+                sum += trainingX[index][i] * W[(int)trainingD[index]][i];
             }
             return ActivationFunction(sum);
         }
@@ -181,6 +156,9 @@ namespace Nauron.Models
         public List<double> GetTrainingErrors(){
             return trainingErrors;
         }
-
+        public (List<List<double>> trainingX, double[] trainingD, List<List<double>> testingX, double[] testingD) GetData()
+        {
+            return (trainingX, trainingD, testingX, testingD);
+        }
     }
 }
