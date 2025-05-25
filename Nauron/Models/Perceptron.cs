@@ -12,7 +12,7 @@ namespace Nauron.Models
         double[] trainingD;
         List<List<double>> testingX;
         double[] testingD;
-        List<List<double>> W;
+        double[] W;
         double[] w0;
         double trainedError;
         int func;
@@ -21,18 +21,15 @@ namespace Nauron.Models
         public Perceptron(int func) {
             this.func = func;
             rand = new Random();
+            trainingErrors = new List<double>();
         }
         public void InitTrain()
         {
-            W.Clear();
+            W = new double[trainingX.Count];
             w0=new double[trainingX.Count];
             for (int i = 0; i < trainingX.Count; i++)
             {
-                for (int j = 0; j < trainingX[i].Count; j++)
-                {
-                    if (j == 0) W.Add(new List<double>(trainingX[i].Count));
-                    W[i].Add(rand.Next(1,11)+rand.Next(1000,100000)*rand.NextDouble());
-                }
+                W[i] = rand.Next(1,11)+(rand.Next(2,30)*rand.NextDouble())/Math.Pow(10,rand.Next(2,10));
                 w0[i] = rand.NextDouble();
             }
             trainingErrors.Clear();
@@ -44,8 +41,6 @@ namespace Nauron.Models
                 throw new ArgumentException("Złożoność tolerancji mniejsza lub równa 0");
             if (maxIterations <= 0)
                 throw new ArgumentException("Maksymalna liczba iteracji mniejsza lub równa 0");
-            if (W.Count == 0)
-                throw new ArgumentException("Nie zainicjalizowano danych");
             while (trainedError > biasToleration && maxIterations>=0)
             {
                 maxIterations--;
@@ -57,8 +52,6 @@ namespace Nauron.Models
         {
             if (maxIterations <= 0)
                 throw new ArgumentException("Maksymalna liczba iteracji mniejsza lub równa 0");
-            if (W.Count == 0)
-                throw new ArgumentException("Nie zainicjalizowano danych");
 
             while (maxIterations >= 0)
             {
@@ -69,7 +62,7 @@ namespace Nauron.Models
         }
         public double SingleIterationTrain()
         {
-            if (W.Count==0)
+            if (W==null)
                 throw new ArgumentException("Nie zainicjalizowano danych");
             double sumSquaredError = 0.0;
             for (int t = 0; t < trainingX.Count; t++)
@@ -79,7 +72,7 @@ namespace Nauron.Models
 
                 if (error != 0)
                     for (int i = 0; i < trainingX[t].Count; i++)
-                        W[(int)trainingD[t]][i] = W[(int)trainingD[t]][i] + trainingX[t][i] * error;
+                        W[t] = W[t] + trainingX[t][i] * error;
 
                 sumSquaredError += error * error;
             }
@@ -88,24 +81,12 @@ namespace Nauron.Models
             trainingErrors.Add(trainedError);
             return trainedError;
         }
-
-        public double Test()
-        {
-            double sumSquaredError = 0.0;
-            for (int t = 0; t < testingX.Count; t++)
-            {
-                double output = Calculate(t);
-                double error = testingD[t] - output;
-                sumSquaredError += error * error;
-            }
-            return sumSquaredError / testingX.Count;
-        }
         public double Calculate(int index)
         {
-            double sum = w0[0];
+            double sum = w0[index];
             for (int i = 0; i < trainingX[index].Count; i++)
             {
-                sum += trainingX[index][i] * W[(int)trainingD[index]][i];
+                sum += trainingX[index][i] * W[index];
             }
             return ActivationFunction(sum);
         }
@@ -146,10 +127,8 @@ namespace Nauron.Models
             this.testingX = testingX;
             this.trainingD = trainingD;
             this.testingD = testingD;
-            this.W = new List<List<double>>(trainingX.Count);
-            trainingErrors = new List<double>();
         }
-        public List<List<double>> GetWeights()
+        public double[] GetWeights()
         {
             return W;
         }

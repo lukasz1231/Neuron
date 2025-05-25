@@ -1,5 +1,6 @@
 ﻿using Nauron.Models;
 using System;
+using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Text;
 using System.Windows;
@@ -27,6 +28,95 @@ namespace Nauron
         Neuron neuron;
         DataManager dataManager;
 
+        private void DrawAxesWithLabels(Canvas canvas, bool withX = true)
+        {
+            (trainingX, trainingD, testingX, testingD) = neuron.GetData();
+            double width = canvas.ActualWidth;
+            double height = canvas.ActualHeight;
+
+            if (withX)
+            {
+                // Rysowanie osi X
+                Line xAxis = new Line
+                {
+                    X1 = 0,
+                    Y1 = height / 2,
+                    X2 = width,
+                    Y2 = height / 2,
+                    Stroke = Brushes.Black,
+                    StrokeThickness = 1
+                };
+                canvas.Children.Add(xAxis);
+            }
+            // Rysowanie osi Y
+            Line yAxis = new Line
+            {
+                X1 = width / 2,
+                Y1 = 0,
+                X2 = width / 2,
+                Y2 = height,
+                Stroke = Brushes.Black,
+                StrokeThickness = 1
+            };
+            canvas.Children.Add(yAxis);
+
+            // Przeskalowanie wartości dla osi X i Y
+            double xMax = 0, xMin = double.MaxValue;
+            if(withX)
+                for (int i = 0; i < trainingX.Count; i++)
+                {
+                    if (trainingX[i].Max() > xMax)
+                        xMax = trainingX[i].Max();
+                    if (trainingX[i].Min() < xMin)
+                        xMin = trainingX[i].Min();
+                }
+            double yMin;
+            double yMax;
+            if (withX)
+            {
+                yMin = trainingD.Min();
+                yMax = trainingD.Max();
+            }
+            else
+            {
+                yMin = Math.Floor(neuron.GetTrainingErrors().Min());
+                yMax = Math.Round(neuron.GetTrainingErrors().Max());
+            }
+
+
+            if (withX)
+            {
+                // Rysowanie etykiet na osi X (co 1 jednostka)
+                for (int i = (int)xMin; i <= xMax; i++)
+                {
+                    double x = Normalize(i, xMin, xMax, 10, width - 10);
+                    TextBlock label = new TextBlock
+                    {
+                        Text = i.ToString(),
+                        Foreground = Brushes.Black,
+                        FontSize = 10
+                    };
+                    Canvas.SetLeft(label, x - 10);
+                    Canvas.SetTop(label, height / 2 + 5);
+                    canvas.Children.Add(label);
+                }
+            }
+
+            // Rysowanie etykiet na osi Y (co 1 jednostka)
+            for (int j = (int)yMin; j <= yMax; j++)
+            {
+                double y = Normalize(j, yMin, yMax, height - 10, 10); // Odwrócone przeskalowanie osi Y - do sprawdzenia
+                TextBlock label = new TextBlock
+                {
+                    Text = j.ToString(),
+                    Foreground = Brushes.Black,
+                    FontSize = 10
+                };
+                Canvas.SetLeft(label, width / 2 + 5);
+                Canvas.SetTop(label, y - 5);
+                canvas.Children.Add(label);
+            }
+        }
 
         private void DrawData()
         {
@@ -117,25 +207,54 @@ namespace Nauron
                     minY = wynik;
             }
             double x, y, x2, y2;
-            for (int i = 0; i < trainingX.Count-1; i++)
+            Polyline polyline = new Polyline
             {
-                    x = Normalize(trainingX[i][0], minX, maxX, 10, width - 10);
-                    y = Normalize(neuron.Calculate(i), minY, maxY, 10, height - 10);
-                    x2 = Normalize(trainingX[i+1][0], minX, maxX, 10, width - 10);
-                    y2 = Normalize(neuron.Calculate(i + 1), minY, maxY, 10, height - 10);
-
-                    Line line = new Line
-                    {
-                        X1 = x,
-                        Y1 = y,
-                        X2 = x2,
-                        Y2 = y2,
-                        Stroke = Brushes.Blue,
-                        StrokeThickness = 2,
-                        StrokeDashArray = new DoubleCollection { 2 }
-                    };
-            PlotCanvas.Children.Add(line);
+                Stroke = Brushes.Blue,
+                StrokeThickness = 2,
+                StrokeDashArray = new DoubleCollection { 2 }
+            };
+            for (int i = 0; i < trainingX.Count - 1; i++)
+            {
+                x = Normalize(trainingX[i][0], minX, maxX, 10, width - 10);
+                y = Normalize(neuron.Calculate(i), minY, maxY, 10, height - 10);
+                polyline.Points.Add(new Point(x, y));
             }
+            PlotCanvas.Children.Add(polyline);
+        }
+        private void DrawErrorPlot()
+        {
+            ErrorPlotCanvas.Children.Clear();
+            DrawAxesWithLabels(ErrorPlotCanvas, false); // Dodanie osi z etykietami
+            var errors = neuron.GetTrainingErrors();
+
+
+            double width = ErrorPlotCanvas.ActualWidth;
+            double height = ErrorPlotCanvas.ActualHeight;
+
+
+            double maxError = errors.Max();
+
+            Polyline polyline = new Polyline
+            {
+                Stroke = Brushes.DarkRed,
+                StrokeThickness = 2
+            };
+
+            for (int i = 0; i < errors.Count; i++)
+            {
+                double x = (i / ( errors.Count-1.0)) * (width - 20) + 10;
+                double y = (errors[i] / maxError) * (height - 20) + 10;
+                polyline.Points.Add(new Point(x, y));
+                if (errors.Count == 1)
+                {
+                    polyline.Points.Clear();
+                    polyline.Points.Add(new Point(10, y));
+                    x = width - 10;
+                    polyline.Points.Add(new Point(x, y));
+                }
+            }
+
+            ErrorPlotCanvas.Children.Add(polyline);
         }
         private void FunctionButton_Click(object sender, RoutedEventArgs e)
         {
@@ -173,15 +292,14 @@ namespace Nauron
         }
         private void TrainButton_Click(object sender, RoutedEventArgs e)
         {
-            string fileName = FileNameBox.Text.Trim();
             double error;
             //try
             //{
                 if (CheckboxErr.IsChecked ?? false){
-                    error = neuron.TrainToBias(double.Parse(MaxErrorBox.Text), Convert.ToInt64(MaxIterBox.Text));
+                    error = neuron.TrainToBias(double.Parse(MaxErrorBox.Text), long.Parse(MaxIterBox.Text));
                 }
                 else if (CheckboxIter.IsChecked ?? false)
-                    error = neuron.TrainToIterations(Convert.ToInt64(MaxIterBox.Text));
+                    error = neuron.TrainToIterations(long.Parse(MaxIterBox.Text));
                 else if (CheckboxSingle.IsChecked ?? false)
                     error = neuron.SingleIterationTrain();
                 else
@@ -220,113 +338,7 @@ namespace Nauron
             CheckboxSingle.IsChecked= false;
             CheckboxIter.IsChecked= false;
         }
-        private void DrawErrorPlot()
-        {
-            ErrorPlotCanvas.Children.Clear();
-            DrawAxesWithLabels(ErrorPlotCanvas, false); // Dodanie osi z etykietami
-            var errors=neuron.GetTrainingErrors();
-
-            if (errors.Count < 2) return;
-
-            double width = ErrorPlotCanvas.ActualWidth;
-            double height = ErrorPlotCanvas.ActualHeight;
-
-
-            double maxError = errors.Max();
-
-            Polyline polyline = new Polyline
-            {
-                Stroke = Brushes.DarkRed,
-                StrokeThickness = 2
-            };
-
-            for (int i = 0; i < errors.Count; i++)
-            {
-                double x = (i / (double)(errors.Count - 1)) * (width - 20) + 10;
-                double y = (errors[i] / maxError) * (height - 20) - 10;
-                polyline.Points.Add(new Point(x, y));
-            }
-
-            ErrorPlotCanvas.Children.Add(polyline);
-        }
-
-        private void DrawAxesWithLabels(Canvas canvas, bool withX=true)
-        {
-            (trainingX, trainingD, testingX, testingD) = neuron.GetData();
-            double width = canvas.ActualWidth;
-            double height = canvas.ActualHeight;
-
-            if (withX)
-            {
-                // Rysowanie osi X
-                Line xAxis = new Line
-                {
-                    X1 = 0,
-                    Y1 = height / 2,
-                    X2 = width,
-                    Y2 = height / 2,
-                    Stroke = Brushes.Black,
-                    StrokeThickness = 1
-                };
-                canvas.Children.Add(xAxis);
-            }
-            // Rysowanie osi Y
-            Line yAxis = new Line
-            {
-                X1 = width / 2,
-                Y1 = 0,
-                X2 = width / 2,
-                Y2 = height,
-                Stroke = Brushes.Black,
-                StrokeThickness = 1
-            };
-            canvas.Children.Add(yAxis);
-
-            // Przeskalowanie wartości dla osi X i Y
-            double xMax = 0, xMin = double.MaxValue;
-            for (int i = 0; i < trainingX.Count; i++)
-            {
-                if (trainingX[i].Max() > xMax)
-                    xMax = trainingX[i].Max();
-                if (trainingX[i].Min() < xMin)
-                    xMin = trainingX[i].Min();
-            }
-            double yMin = trainingD.Min();
-            double yMax = trainingD.Max();
-
-            if (withX)
-            {
-                // Rysowanie etykiet na osi X (co 1 jednostka)
-                for (int i = (int)xMin; i <= xMax; i++)
-                {
-                    double x = Normalize(i, xMin, xMax, 10, width - 10);
-                    TextBlock label = new TextBlock
-                    {
-                        Text = i.ToString(),
-                        Foreground = Brushes.Black,
-                        FontSize = 10
-                    };
-                    Canvas.SetLeft(label, x - 10);
-                    Canvas.SetTop(label, height / 2 + 5);
-                    canvas.Children.Add(label);
-                }
-            }
-            // Rysowanie etykiet na osi Y (co 1 jednostka)
-            for (int j = (int)yMin; j <= yMax; j++)
-            {
-                double y = Normalize(j, yMin, yMax, height - 10, 10); // Odwrócone przeskalowanie osi Y - do sprawdzenia
-                TextBlock label = new TextBlock
-                {
-                    Text = j.ToString(),
-                    Foreground = Brushes.Black,
-                    FontSize = 10
-                };
-                Canvas.SetLeft(label, width / 2 + 5);
-                Canvas.SetTop(label, y - 5);
-                canvas.Children.Add(label);
-            }
-        }
-
+        
         private double Normalize(double value, double min, double max, double targetMin, double targetMax)
         {
             if (min == max)
