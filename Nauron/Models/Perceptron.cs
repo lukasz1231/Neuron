@@ -101,13 +101,13 @@ namespace Nauron.Models
             switch (func)
             {
                 case 0: // StepBinary
-                    return input > 0 ? 1.0 : 0.0;
+                    return input > 0 ? 1.0 : 0.0; // dziala z danymi
 
                 case 1: // StepBipolar
                     return input > 0 ? 1.0 : -1.0;
 
                 case 2: // Sigmoid
-                    return 1.0 / (1.0 + Math.Exp(-input));
+                    return 1.0 / (1.0 + Math.Exp(-input)); // dziala z danymi
 
                 case 3: // Tanh
                     return Math.Tanh(input);
