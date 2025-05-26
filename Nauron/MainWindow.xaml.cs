@@ -306,7 +306,7 @@ namespace Nauron
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             CheckboxSingle.IsChecked = true;
-            neuron = new Perceptron(1);
+            neuron = new Adaline(1);
             dataManager = new DataManager();
         }
 

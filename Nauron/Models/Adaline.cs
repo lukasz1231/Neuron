@@ -65,7 +65,7 @@ namespace Nauron.Models
         {
             if (W == null)
                 throw new ArgumentException("Nie zainicjalizowano danych");
-            if (learningRate == null)
+            if (learningRate == 0.0)
                 throw new ArgumentException("Nie zainicjalizowano danych lub nie podano tempa uczenia");
 
             double sumSquaredError = 0.0;
