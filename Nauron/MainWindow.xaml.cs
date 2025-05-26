@@ -27,7 +27,7 @@ namespace Nauron
         FunctionSelector fs;
         Neuron neuron;
         DataManager dataManager;
-
+        double yMin, yMax, xMin, xMax;
         private void DrawAxesWithLabels(Canvas canvas, bool withX = true)
         {
             (trainingX, trainingD, testingX, testingD) = neuron.GetData();
@@ -61,21 +61,32 @@ namespace Nauron
             canvas.Children.Add(yAxis);
 
             // Przeskalowanie wartości dla osi X i Y
-            double xMax = 0, xMin = double.MaxValue;
-            if(withX)
+            xMax = 0;
+            xMin = double.MaxValue;
+            if(withX){
                 for (int i = 0; i < trainingX.Count; i++)
                 {
-                    if (trainingX[i].Max() > xMax)
-                        xMax = trainingX[i].Max();
-                    if (trainingX[i].Min() < xMin)
-                        xMin = trainingX[i].Min();
+                    if (trainingX[i][0] > xMax)
+                        xMax = trainingX[i][0];
+                    if (trainingX[i][0] < xMin)
+                        xMin = trainingX[i][0];
                 }
-            double yMin;
-            double yMax;
+                xMax=Math.Ceiling(xMax);
+                xMin = Math.Floor(xMin);
+            }
+            yMin=double.MaxValue;
+            yMax=0;
             if (withX)
             {
-                yMin = trainingD.Min();
-                yMax = trainingD.Max();
+                for (int i = 0; i < trainingX.Count; i++)
+                {
+                    if (trainingX[i][1] > yMax)
+                        yMax = trainingX[i][1];
+                    if (trainingX[i][1] < yMin)
+                        yMin = trainingX[i][1];
+                }
+                yMax = Math.Ceiling(yMax);
+                yMin = Math.Floor(yMin);
             }
             else
             {
@@ -126,22 +137,10 @@ namespace Nauron
             (trainingX, trainingD, testingX, testingD) = neuron.GetData();
             double width = PlotCanvas.ActualWidth;
             double height = PlotCanvas.ActualHeight;
-            double maxX=0, minX=double.MaxValue, maxY = 0, minY = double.MaxValue;
             for (int i = 0; i < trainingX.Count; i++)
             {
-                if (trainingX[i][0]>maxX)
-                    maxX = trainingX[i][0];
-                if (trainingX[i][0]<minX)
-                    minX= trainingX[i][0];
-                if (trainingX[i][1] > maxY)
-                    maxY = trainingX[i][1];
-                if (trainingX[i][1] < minY)
-                    minY = trainingX[i][1];
-            }
-            for (int i = 0; i < trainingX.Count; i++)
-            {
-                    double x = Normalize(trainingX[i][0], minX, maxX, 10, width - 10);
-                    double y = Normalize(trainingX[i][1], minY, maxY, 10, height - 10);
+                    double x = Normalize(trainingX[i][0], xMin, xMax, 10, width - 10);
+                    double y = Normalize(trainingX[i][1], yMin, yMax, 10, height - 10);
 
                     Ellipse point = new Ellipse
                     {
@@ -154,30 +153,6 @@ namespace Nauron
                     Canvas.SetTop(point, y);
                         PlotCanvas.Children.Add(point);
             }
-            for(int i=0;i< trainingX.Count; i++)
-            {
-                var wynik = neuron.Calculate(i);
-                if (wynik > maxY)
-                    maxY = wynik;
-                if (wynik < minY)
-                    minY = wynik;
-            }
-            for (int i = 0; i < trainingX.Count; i++)
-            {
-                double x = Normalize(trainingX[i][0], minX, maxX, 10, width - 10);
-                double y = Normalize(neuron.Calculate(i), minY, maxY, 10, height - 10);
-
-                Ellipse point = new Ellipse
-                {
-                    Width = 6,
-                    Height = 6,
-                    Fill = Brushes.Violet
-                };
-
-                Canvas.SetLeft(point, x);
-                Canvas.SetTop(point, y);
-                PlotCanvas.Children.Add(point);
-            }
         }
 
         private void DrawDecisionBoundary()
@@ -185,32 +160,20 @@ namespace Nauron
             double width = PlotCanvas.ActualWidth;
             double height = PlotCanvas.ActualHeight;
             (trainingX, trainingD, testingX, testingD) = neuron.GetData();
-
-            double maxX = 0, minX = double.MaxValue, maxY = 0, minY = double.MaxValue;
-            double wynik = 0;
-            for (int i = 0; i < trainingX.Count; i++)
-            {
-                if (trainingX[i][0] > maxX)
-                    maxX = trainingX[i][0];
-                if (trainingX[i][0] < minX)
-                    minX = trainingX[i][0];
-                wynik = neuron.Calculate(i);
-                if(wynik > maxY)
-                    maxY = wynik;
-                if(wynik < minY)
-                    minY = wynik;
-            }
-            double x, y, x2, y2;
+            var W = neuron.GetWeights();
+            double x, y, yTemp;
             Polyline polyline = new Polyline
             {
                 Stroke = Brushes.Blue,
                 StrokeThickness = 2,
                 StrokeDashArray = new DoubleCollection { 2 }
             };
-            for (int i = 0; i < trainingX.Count - 1; i++)
+            if (W[2] == 0) W[2]=0.0000001;
+            for (int i = 0; i < trainingX.Count; i++)
             {
-                x = Normalize(trainingX[i][0], minX, maxX, 10, width - 10);
-                y = Normalize(neuron.Calculate(i), minY, maxY, 10, height - 10);
+                yTemp = (W[1] * Normalize(i, 0, trainingX.Count - 1, xMin, xMax) + W[0]) / W[2];
+                x = Normalize(i, 0, trainingX.Count-1, 10, width - 10);
+                y = Normalize(yTemp, yMin, yMax, height - 10, 10);
                 polyline.Points.Add(new Point(x, y));
             }
             PlotCanvas.Children.Add(polyline);
@@ -225,10 +188,6 @@ namespace Nauron
             double width = ErrorPlotCanvas.ActualWidth;
             double height = ErrorPlotCanvas.ActualHeight;
 
-
-            double maxError = Math.Ceiling(errors.Max());
-            double minError = Math.Floor(errors.Min());
-
             Polyline polyline = new Polyline
             {
                 Stroke = Brushes.DarkRed,
@@ -238,7 +197,7 @@ namespace Nauron
             for (int i = 0; i < errors.Count; i++)
             {
                 double x = (i / ( errors.Count-1.0)) * (width - 20) + 10;
-                double y = Normalize(errors[i],minError,maxError,height-10,10);
+                double y = Normalize(errors[i],yMin, yMax,height-10,10);
                 polyline.Points.Add(new Point(x, y));
                 if (errors.Count == 1)
                 {
@@ -270,8 +229,9 @@ namespace Nauron
             try
             {
                 string fileName = FileNameBox.Text.Trim(); 
-                (trainingX, trainingD, testingX, testingD) = dataManager.LoadData(fileName, double.Parse(UlamekTestowych.Text));
+                (trainingX, trainingD, testingX, testingD) = dataManager.LoadData(fileName);
                 neuron.newData(trainingX, trainingD, testingX, testingD);
+                neuron.ChangeLearningRate(double.Parse(LearningRate.Text));
             }
             catch (ArgumentException ex)
             {

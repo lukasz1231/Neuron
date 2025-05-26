@@ -18,6 +18,7 @@ namespace Nauron.Models
         int func;
         List<double> trainingErrors;
         Random rand;
+        double learningRate;
         public Perceptron(int func) {
             this.func = func;
             rand = new Random();
@@ -63,6 +64,9 @@ namespace Nauron.Models
         {
             if (W==null)
                 throw new ArgumentException("Nie zainicjalizowano danych");
+            if(learningRate==null)
+                throw new ArgumentException("Nie zainicjalizowano danych lub nie podano tempa uczenia");
+
             double sumSquaredError = 0.0;
             for (int t = 0; t < trainingX.Count; t++)
             {
@@ -71,7 +75,7 @@ namespace Nauron.Models
 
                 if (error != 0)
                     for (int i = 0; i < trainingX[t].Count; i++)
-                        W[i] = W[i] + trainingX[t][i] * error;
+                        W[i] = W[i] + learningRate*trainingX[t][i] * error;
 
                 sumSquaredError += error * error;
             }
@@ -116,6 +120,10 @@ namespace Nauron.Models
                     throw new ArgumentException("Unknown activation function");
             }
         }
+        public void ChangeLearningRate(double s)
+        {
+            learningRate = s;
+        }
         public void ChangeFunction(int func)
         {
             this.func = func;
@@ -129,7 +137,11 @@ namespace Nauron.Models
         }
         public double[] GetWeights()
         {
-            return W;
+            double[] w = new double[3];
+            w[0] = w0;
+            w[1] = W[0];
+            w[2] = W[1];
+            return w;
         }
         public List<double> GetTrainingErrors(){
             return trainingErrors;

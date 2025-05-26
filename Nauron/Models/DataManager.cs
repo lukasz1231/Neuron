@@ -11,16 +11,13 @@ namespace Nauron.Models
     internal class DataManager
     {
         public (List<List<double>> trainingX, double[] trainingD, List<List<double>> testingX, double[] testingD)
-            LoadData(string fileName, double trainPercent)
+            LoadData(string fileName)
         {
             string filePath = Path.Combine("../../../Data/", fileName);
             if (!File.Exists(filePath))
             {
                 throw new FileNotFoundException($"Plik {fileName} nie istnieje.");
             }
-            if (trainPercent <= 0 || trainPercent >= 1)
-                throw new ArgumentException("trainPercent musi być liczbą z przedziału (0, 1).");
-            trainPercent = 1;
             var allData = new List<(List<double> x, double d)>();
             var lines = File.ReadAllLines(filePath);
             var culture = CultureInfo.InvariantCulture;
@@ -53,7 +50,7 @@ namespace Nauron.Models
             var rand = new Random();
             allData = allData.OrderBy(_ => rand.Next()).ToList();
 
-            int trainCount = (int)(allData.Count * trainPercent);
+            int trainCount = (int)(allData.Count * 1);
 
             var trainingData = allData.Take(trainCount).ToArray();
             var testingData = allData.Skip(trainCount).ToArray();
