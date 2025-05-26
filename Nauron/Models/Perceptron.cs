@@ -73,9 +73,11 @@ namespace Nauron.Models
                 double output = Calculate(t);
                 double error = trainingD[t] - output;
 
-                if (error != 0)
+                if (error != 0){
                     for (int i = 0; i < trainingX[t].Count; i++)
-                        W[i] = W[i] + learningRate*trainingX[t][i] * error;
+                        W[i] = W[i] + learningRate * trainingX[t][i] * error;
+                    w0 = w0 + learningRate * error;
+                }
 
                 sumSquaredError += error * error;
             }

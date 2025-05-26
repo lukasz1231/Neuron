@@ -171,9 +171,10 @@ namespace Nauron
             if (W[2] == 0) W[2]=0.0000001;
             for (int i = 0; i < trainingX.Count; i++)
             {
-                yTemp = (W[1] * Normalize(i, 0, trainingX.Count - 1, xMin, xMax) + W[0]) / W[2];
+                x = Normalize(i, 0, trainingX.Count - 1, xMin, xMax);
+                yTemp = -W[1] / W[2] * x - W[0] / W[2];
                 x = Normalize(i, 0, trainingX.Count-1, 10, width - 10);
-                y = Normalize(yTemp, yMin, yMax, height - 10, 10);
+                y = Normalize(yTemp, yMin, yMax,10, height - 10);
                 polyline.Points.Add(new Point(x, y));
             }
             PlotCanvas.Children.Add(polyline);
