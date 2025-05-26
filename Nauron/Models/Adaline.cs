@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Nauron.Models
 {
-    internal class Perceptron : Neuron
+    internal class Adaline : Neuron
     {
         List<List<double>> trainingX;
         double[] trainingD;
@@ -18,7 +18,9 @@ namespace Nauron.Models
         int func;
         List<double> trainingErrors;
         Random rand;
-        public Perceptron(int func) {
+        double learningRate;
+        public Adaline(int func)
+        {
             this.func = func;
             rand = new Random();
             trainingErrors = new List<double>();
@@ -26,8 +28,8 @@ namespace Nauron.Models
         public void InitTrain()
         {
             W = new double[2];
-            W[0] = rand.Next(1,11)+(rand.Next(2,30)*rand.NextDouble())/Math.Pow(10,rand.Next(2,10));
-            W[1] = rand.Next(1,11)+(rand.Next(2,30)*rand.NextDouble())/Math.Pow(10,rand.Next(2,10));
+            W[0] = rand.Next(1, 11) + (rand.Next(2, 30) * rand.NextDouble()) / Math.Pow(10, rand.Next(2, 10));
+            W[1] = rand.Next(1, 11) + (rand.Next(2, 30) * rand.NextDouble()) / Math.Pow(10, rand.Next(2, 10));
 
             w0 = rand.NextDouble();
 
@@ -40,7 +42,7 @@ namespace Nauron.Models
                 throw new ArgumentException("Złożoność tolerancji mniejsza lub równa 0");
             if (maxIterations <= 0)
                 throw new ArgumentException("Maksymalna liczba iteracji mniejsza lub równa 0");
-            while (trainedError > biasToleration && maxIterations>=0)
+            while (trainedError > biasToleration && maxIterations >= 0)
             {
                 maxIterations--;
                 SingleIterationTrain();
@@ -61,8 +63,10 @@ namespace Nauron.Models
         }
         public double SingleIterationTrain()
         {
-            if (W==null)
+            if (W == null)
                 throw new ArgumentException("Nie zainicjalizowano danych");
+            if (learningRate == null)
+                throw new ArgumentException("Nie zainicjalizowano danych lub nie podano tempa uczenia");
 
             double sumSquaredError = 0.0;
             for (int t = 0; t < trainingX.Count; t++)
@@ -70,10 +74,11 @@ namespace Nauron.Models
                 double output = Calculate(t);
                 double error = trainingD[t] - output;
 
-                if (error != 0){
+                if (error != 0)
+                {
                     for (int i = 0; i < trainingX[t].Count; i++)
-                        W[i] = W[i] + trainingX[t][i] * error;
-                    w0 = w0 + error;
+                        W[i] = W[i] + learningRate * trainingX[t][i] * error;
+                    w0 = w0 + learningRate * error;
                 }
 
                 sumSquaredError += error * error;
@@ -90,7 +95,7 @@ namespace Nauron.Models
             {
                 sum += trainingX[index][i] * W[i];
             }
-            return ActivationFunction(sum);
+            return sum;
         }
 
         private double ActivationFunction(double input)
@@ -121,7 +126,7 @@ namespace Nauron.Models
         }
         public void ChangeLearningRate(double s)
         {
-            ;
+            learningRate = s;
         }
         public void ChangeFunction(int func)
         {
@@ -142,7 +147,8 @@ namespace Nauron.Models
             w[2] = W[1];
             return w;
         }
-        public List<double> GetTrainingErrors(){
+        public List<double> GetTrainingErrors()
+        {
             return trainingErrors;
         }
         public (List<List<double>> trainingX, double[] trainingD, List<List<double>> testingX, double[] testingD) GetData()
