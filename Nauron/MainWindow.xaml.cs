@@ -177,6 +177,7 @@ namespace Nauron
                 y = Normalize(yTemp, yMin, yMax,10, height - 10);
                 polyline.Points.Add(new Point(x, y));
             }
+            polyline.ClipToBounds = true;
             PlotCanvas.Children.Add(polyline);
         }
         private void DrawErrorPlot()
