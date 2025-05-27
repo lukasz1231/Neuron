@@ -64,13 +64,14 @@ namespace Nauron
             {
                 return;
             }
-            if (pointSelected!=-1){
-                if(x>xMax) xMax= x;
-                if(x<xMin) xMin = x;
-                if (!(x == xMin && x == xMax))
-                FindMinAndMaxPoint();
-            }
             trainingX[pointSelected][0] = x;
+            if (pointSelected != -1)
+            {
+                if (x > xMax) xMax = x;
+                if (x < xMin) xMin = x;
+                if (!(x == xMin || x == xMax))
+                    FindMinAndMaxPoint();
+            }
             DrawPoints();
         }
         public void CoordChangedY(object sender, RoutedEventArgs e)
@@ -79,14 +80,14 @@ namespace Nauron
             {
                 return;
             }
+            trainingX[pointSelected][1] = y;
             if (pointSelected != -1)
             {
                 if (y > yMax) yMax = y;
                 if (y < yMin) yMin = y;
-                if(!(y==yMin&&y==yMax)) 
-                FindMinAndMaxPoint();
+                if (!(y == yMin || y == yMax))
+                    FindMinAndMaxPoint();
             }
-            trainingX[pointSelected][1] = y;
             DrawPoints();
         }
         public void ZmienZbior(object sender, RoutedEventArgs e)
@@ -123,7 +124,6 @@ namespace Nauron
                 if(x+6>=mouse.X && x-6<=mouse.X&& y + 6 >= mouse.Y && y - 6 <= mouse.Y)
                 {
                     pointSelected = i;
-                    //LabelNadPlikiem.Content = trainingX[i][0]+" " + trainingX[i][1];
                     XCoord.Text = trainingX[i][0].ToString();
                     YCoord.Text = trainingX[i][1].ToString();
                     return;
@@ -156,6 +156,10 @@ namespace Nauron
         }
         void FindMinAndMaxPoint()
         {
+            xMax = 0;
+            yMax = 0;
+            yMin = double.MaxValue;
+            xMin = double.MaxValue;
             for (int i = 0; i < trainingX.Count; i++)
             {
                 if (trainingX[i][0] > xMax)
