@@ -151,5 +151,9 @@ namespace Nauron.Models
         {
             return (trainingX, trainingD, testingX, testingD);
         }
+        public bool IsInitialized()
+        {
+            return W != null;
+        }
     }
 }

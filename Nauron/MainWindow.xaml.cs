@@ -25,6 +25,7 @@ namespace Nauron
         List<List<double>> testingX;
         double[] testingD;
         FunctionSelector fs;
+        DataEditor de;
         Neuron neuron;
         DataManager dataManager;
         double yMin, yMax, xMin, xMax;
@@ -222,6 +223,22 @@ namespace Nauron
                 fs.Show();
             }
         }
+        private void OpenDataEditor(object sender, RoutedEventArgs e)
+        {
+            if(!neuron.IsInitialized()){
+                MessageBox.Show("Błąd!\nZainicjalizuj dane");
+                return;
+            }
+            if (de == null) de = new DataEditor(this);
+                if (!de.IsActive)
+                {
+                    if (!de.IsLoaded)
+                    {
+                        de = new DataEditor(this);
+                    }
+                    de.Show();
+                }
+        }
         public void ChangeFunction(int i)
         {
             neuron.ChangeFunction(i);
@@ -316,12 +333,6 @@ namespace Nauron
             CheckboxSingle.IsChecked = true;
             neuron = new Perceptron(0);
             dataManager = new DataManager();
-            // do debugowania, potem usunąć
-            string fileName = FileNameBox.Text.Trim();
-            (trainingX, trainingD, testingX, testingD) = dataManager.LoadData(fileName);
-            neuron.newData(trainingX, trainingD, testingX, testingD);
-            var de = new DataEditor(this);
-            de.Show();
         }
         public MainWindow()
         {

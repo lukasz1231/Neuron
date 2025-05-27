@@ -14,8 +14,9 @@
             <RowDefinition Height="150"/>
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal" Grid.Row="0">
-            <Label Content="Plik z danymi" Margin="40,0,0,0"/>
-            <Label Content="Maksymalny błąd" Margin="90,0,0,0"/>
+            <Label Content="Plik z danymi" Margin="20,0,20,0"/>
+            <Button Content="Edytuj dane" Click="OpenDataEditor" />
+            <Label Content="Maksymalny błąd" Margin="20,0,0,0"/>
             <Label Content="Maksymalna liczba iteracji" Margin="0,0,10,0"/>
             <CheckBox x:Name="CheckboxSingle" Checked="ChangeTrainingModeSingle"  Content="Pojedyncza iteracja" Margin="0,0,10,0"></CheckBox>
             <CheckBox x:Name="CheckboxIter" Checked="ChangeTrainingModeMaxIt" Content="Maksymalna liczba iteracji" Margin="0,0,10,0"></CheckBox>

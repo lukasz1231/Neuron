@@ -142,6 +142,10 @@ namespace Nauron.Models
             w[2] = W[1];
             return w;
         }
+        public bool IsInitialized()
+        {
+            return W != null;
+        }
         public List<double> GetTrainingErrors(){
             return trainingErrors;
         }
