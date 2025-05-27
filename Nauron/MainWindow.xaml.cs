@@ -140,7 +140,7 @@ namespace Nauron
             for (int i = 0; i < trainingX.Count; i++)
             {
                     double x = Normalize(trainingX[i][0], xMin, xMax, 10, width - 10);
-                    double y = Normalize(trainingX[i][1], yMin, yMax, 10, height - 10);
+                    double y = Normalize(trainingX[i][1], yMin, yMax, height - 10, 10);
 
                     Ellipse point = new Ellipse
                     {
@@ -149,8 +149,8 @@ namespace Nauron
                         Fill = trainingD[i] > 0 ? Brushes.Green : Brushes.Red
                     };
 
-                    Canvas.SetLeft(point, x);
-                    Canvas.SetTop(point, y);
+                    Canvas.SetLeft(point, x-3);
+                    Canvas.SetTop(point, y-3);
                         PlotCanvas.Children.Add(point);
             }
         }
@@ -174,7 +174,7 @@ namespace Nauron
                 x = Normalize(i, 0, trainingX.Count - 1, xMin, xMax);
                 yTemp = -W[1] / W[2] * x - W[0] / W[2];
                 x = Normalize(i, 0, trainingX.Count-1, 10, width - 10);
-                y = Normalize(yTemp, yMin, yMax,10, height - 10);
+                y = Normalize(yTemp, yMin, yMax, height - 10, 10);
                 polyline.Points.Add(new Point(x, y));
             }
             polyline.ClipToBounds = true;
@@ -296,20 +296,33 @@ namespace Nauron
             CheckboxIter.IsChecked= false;
         }
         
-        private double Normalize(double value, double min, double max, double targetMin, double targetMax)
+        public double Normalize(double value, double min, double max, double targetMin, double targetMax)
         {
             if (min == max)
                 max++;
             return targetMin + (value - min) / (max - min) * (targetMax - targetMin);
         }
+        public void SetNeuron(Neuron nr)
+        {
+            neuron = nr;
+        }
+        public Neuron GetNeuron()
+        {
+            return neuron;
+        }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             CheckboxSingle.IsChecked = true;
-            neuron = new Adaline(1);
+            neuron = new Perceptron(0);
             dataManager = new DataManager();
+            // do debugowania, potem usunąć
+            string fileName = FileNameBox.Text.Trim();
+            (trainingX, trainingD, testingX, testingD) = dataManager.LoadData(fileName);
+            neuron.newData(trainingX, trainingD, testingX, testingD);
+            var de = new DataEditor(this);
+            de.Show();
         }
-
         public MainWindow()
         {
             InitializeComponent();

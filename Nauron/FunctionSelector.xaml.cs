@@ -24,6 +24,12 @@ namespace Nauron
         {
             main = mw;
             InitializeComponent();
+            Loaded += FunctionSelector_Loaded;
+        }
+
+        private void FunctionSelector_Loaded(object sender, RoutedEventArgs e)
+        {
+            ;
         }
 
         void StepBinary(object sender, RoutedEventArgs e)

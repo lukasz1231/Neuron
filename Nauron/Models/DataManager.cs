@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace Nauron.Models
 {
@@ -63,26 +64,23 @@ namespace Nauron.Models
             return (trainingX, trainingD, testingX, testingD);
         }
 
-        // Przykładowa metoda do zapisu danych lub wag do pliku
-        // Możesz ją rozbudować np. o zapisywanie wag perceptronu
-        /*
-        public void SaveToFile(string path, IEnumerable<string> linesToWrite)
+        public static void SaveToFile(string fileName, string[] lines)
         {
             try
             {
-                var directory = Path.GetDirectoryName(path);
-                if (!Directory.Exists(directory))
+                string filePath = Path.Combine("../../../Data/", fileName);
+                if (File.Exists(filePath))
                 {
-                    Directory.CreateDirectory(directory);
+                    var result=MessageBox.Show($"Plik {fileName} już istnije.\nCzy chcesz go nadpisać?", "Plik istnieje", MessageBoxButton.YesNo);
+                    if( result.ToString() != "Yes")
+                        return;
                 }
-
-                File.WriteAllLines(path, linesToWrite);
+                File.WriteAllLines(filePath, lines);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Błąd zapisu do pliku: {ex.Message}");
+                MessageBox.Show($"Błąd zapisu do pliku: {ex.Message}");
             }
         }
-        */
     }
 }
