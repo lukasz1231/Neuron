@@ -24,7 +24,7 @@
             <TextBox x:Name="XCoord" Width="40" TextChanged="CoordChangedX" />
             <TextBox x:Name="YCoord" Width="40" TextChanged="CoordChangedY"/>
             <Label Content="Zbior"/>
-            <CheckBox x:Name="DCheckbox" Click="ZmienZbior" Margin="0,6,0,0" Background="Red"/>
+            <Button x:Name="DButton" Click="ZmienZbior" Background="Red" Width="26"/>
             <Button Margin="10,0,0,0"  Click="DodajPunkt" Content="Dodaj nowy"/>
         </StackPanel>
         <Canvas Name="DataPointsCanvas" MouseDown="MouseDownCanvas" Background="GhostWhite" Grid.Row="2" Margin="10"/>

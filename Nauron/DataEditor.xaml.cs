@@ -15,7 +15,7 @@ namespace Nauron
         MainWindow main;
         Neuron neuron;
         List<List<double>> trainingX;
-        double[] trainingD;
+        List<double> trainingD;
         double xMax = 0, yMax = 0;
         double xMin = double.MaxValue, yMin = double.MaxValue;
         int pointSelected;
@@ -23,12 +23,17 @@ namespace Nauron
         {
             InitializeComponent();
             main = mw;
+            trainingD = new();
             Loaded += DataEditor_Loaded;
         }
         private void DataEditor_Loaded(object sender, RoutedEventArgs e)
         {
             neuron = main.GetNeuron();
-            (trainingX, trainingD, var a, var b) = neuron.GetData();
+            (trainingX, var list, var a, var b) = neuron.GetData();
+            foreach (var item in list)
+            {
+                trainingD.Add(item);
+            }
             pointSelected = -1;
             FindMinAndMaxPoint(); 
             DrawPoints();
@@ -41,52 +46,61 @@ namespace Nauron
         }
         public void ZapiszDaneNeuron(object sender, RoutedEventArgs e)
         {
-            neuron.newData(trainingX, trainingD, null, null);
+            neuron.newData(trainingX, trainingD.ToArray(), null, null);
             main.SetNeuron(neuron);
         }
         string[] DataToString()
         {
-            List<string> wynik = new(trainingD.Length);
-            for (int i = 0; i < trainingD.Length; i++)
+            List<string> wynik = new(trainingD.Count);
+            for (int i = 0; i < trainingD.Count; i++)
             {
-                wynik.Add($"{trainingX[i][0]} {trainingX[i][1]} {trainingD}");
+                wynik.Add($"{trainingX[i][0]} {trainingX[i][1]} {trainingD[i]}");
             }
             return wynik.ToArray();
         }
         public void CoordChangedX(object sender, RoutedEventArgs e)
         {
-            if (XCoord.Text == "") XCoord.Text = "0";
-            double x = Convert.ToDouble(XCoord.Text);
+            if (!double.TryParse(XCoord.Text, out double x))
+            {
+                return;
+            }
             if (pointSelected!=-1){
                 if(x>xMax) xMax= x;
                 if(x<xMin) xMin = x;
+                if (!(x == xMin && x == xMax))
+                FindMinAndMaxPoint();
             }
             trainingX[pointSelected][0] = x;
             DrawPoints();
         }
         public void CoordChangedY(object sender, RoutedEventArgs e)
         {
-            if (YCoord.Text == "") YCoord.Text = "0";
-            double y = Convert.ToDouble(YCoord.Text);
+            if (!double.TryParse(YCoord.Text, out double y)) 
+            {
+                return;
+            }
             if (pointSelected != -1)
             {
                 if (y > yMax) yMax = y;
                 if (y < yMin) yMin = y;
+                if(!(y==yMin&&y==yMax)) 
+                FindMinAndMaxPoint();
             }
             trainingX[pointSelected][1] = y;
             DrawPoints();
         }
         public void ZmienZbior(object sender, RoutedEventArgs e)
         {
-            if (DCheckbox.Background.ToString() == "Red")
-                DCheckbox.Background = Brushes.Green;
+            if (DButton.Background == Brushes.Red)
+                DButton.Background = Brushes.Green;
             else
-                DCheckbox.Background = Brushes.Red;
+                DButton.Background = Brushes.Red;
         }
         public void DodajPunkt(object sender, RoutedEventArgs e)
         {
-            ;
-            FindMinAndMaxPoint();
+            trainingX.Add([(xMax-xMin)/2+xMin,(yMax-yMin)/2+yMin]);
+            trainingD.Add(DButton.Background == Brushes.Red ? 0:1);
+            DrawPoints();
         }
 
         public void MouseDownCanvas(object sender, RoutedEventArgs e)
