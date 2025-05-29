@@ -18,7 +18,8 @@ namespace Nauron
         List<double> trainingD;
         double xMax = 0, yMax = 0;
         double xMin = double.MaxValue, yMin = double.MaxValue;
-        int pointSelected;
+        int pointSelected, highlightedPoint;
+        bool mouseDown, shiftDown;
         public DataEditor(MainWindow mw)
         {
             InitializeComponent();
@@ -28,6 +29,8 @@ namespace Nauron
         }
         private void DataEditor_Loaded(object sender, RoutedEventArgs e)
         {
+            KeyDown += new KeyEventHandler(KeyDownHandler);
+            KeyUp += new KeyEventHandler(KeyUpHandler);
             neuron = main.GetNeuron();
             (trainingX, var list, var a, var b) = neuron.GetData();
             foreach (var item in list)
@@ -35,6 +38,8 @@ namespace Nauron
                 trainingD.Add(item);
             }
             pointSelected = -1;
+            highlightedPoint = -1;
+            shiftDown = false;
             FindMinAndMaxPoint(); 
             DrawPoints();
         }
@@ -60,34 +65,28 @@ namespace Nauron
         }
         public void CoordChangedX(object sender, RoutedEventArgs e)
         {
-            if (!double.TryParse(XCoord.Text, out double x))
+            if (!double.TryParse(XCoord.Text, out double x) || pointSelected==-1)
             {
                 return;
             }
             trainingX[pointSelected][0] = x;
-            if (pointSelected != -1)
-            {
-                if (x > xMax) xMax = x;
-                if (x < xMin) xMin = x;
-                if (!(x == xMin || x == xMax))
-                    FindMinAndMaxPoint();
-            }
+            if (x > xMax) xMax = x;
+            if (x < xMin) xMin = x;
+            if (!(x == xMin || x == xMax))
+                FindMinAndMaxPoint();
             DrawPoints();
         }
         public void CoordChangedY(object sender, RoutedEventArgs e)
         {
-            if (!double.TryParse(YCoord.Text, out double y)) 
+            if (!double.TryParse(YCoord.Text, out double y) || pointSelected == -1) 
             {
                 return;
             }
             trainingX[pointSelected][1] = y;
-            if (pointSelected != -1)
-            {
-                if (y > yMax) yMax = y;
-                if (y < yMin) yMin = y;
-                if (!(y == yMin || y == yMax))
-                    FindMinAndMaxPoint();
-            }
+            if (y > yMax) yMax = y;
+            if (y < yMin) yMin = y;
+            if (!(y == yMin || y == yMax))
+                FindMinAndMaxPoint();
             DrawPoints();
         }
         public void ZmienZbior(object sender, RoutedEventArgs e)
@@ -106,30 +105,77 @@ namespace Nauron
 
         public void MouseDownCanvas(object sender, RoutedEventArgs e)
         {
-            FindChosenPoint(Mouse.GetPosition(DataPointsCanvas));
-            if (pointSelected != -1)
+            mouseDown = true;
+            var prevoiusPoint = pointSelected;
+            if (highlightedPoint != -1)
+            {
+                pointSelected = highlightedPoint;
+                if (prevoiusPoint != pointSelected){
+                    XCoord.Text = trainingX[pointSelected][0].ToString();
+                    YCoord.Text = trainingX[pointSelected][1].ToString();
+                    DrawPoints();
+                }
+            }
+            else{
+                pointSelected = -1;
+                if(prevoiusPoint!= pointSelected)
+                    DrawPoints();
+            }
+        }
+        public void MouseUpCanvas(object sender, MouseEventArgs e)
+        {
+            mouseDown = false;
+        }
+        void KeyDownHandler(object sender, KeyEventArgs e)
+        {
+            if(e.Key== Key.LeftShift)
+            {
+                shiftDown = true;
+            }
+        }
+        void KeyUpHandler(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.LeftShift)
+            {
+                shiftDown = false;
+            }
+        }
+        public void MouseMoveCanvas(object sender, RoutedEventArgs e)
+        {
+            Point mouse;
+            FindHighlightedPoint(mouse = Mouse.GetPosition(DataPointsCanvas));
+            if (highlightedPoint != -1)
             {
                 DrawPoints();
             }
+            if(pointSelected!=-1 && mouseDown)
+            {
+                var width = DataPointsCanvas.ActualWidth;
+                var height = DataPointsCanvas.ActualHeight;
+
+                double x = main.Normalize(mouse.X, 10, width-10, xMin, xMax);
+                double y = main.Normalize(mouse.Y, height-10, 10, yMin, yMax);
+
+                XCoord.Text = (Math.Round(x, shiftDown ? 5 : 2)).ToString();
+                YCoord.Text = (Math.Round(y, shiftDown ? 5 : 2)).ToString();
+            }
         }
-        void FindChosenPoint(Point mouse)
+        void FindHighlightedPoint(Point mouse)
         {
             var width = DataPointsCanvas.ActualWidth;
             var height = DataPointsCanvas.ActualHeight;
-            var prevoiusPoint = pointSelected;
+            var prevoiusPoint = highlightedPoint;
             for (int i = 0; i < trainingX.Count; i++)
             {
                 double x = main.Normalize(trainingX[i][0], xMin, xMax, 10, width - 10);
                 double y = main.Normalize(trainingX[i][1], yMin, yMax, height - 10, 10);
                 if(x+6>=mouse.X && x-6<=mouse.X&& y + 6 >= mouse.Y && y - 6 <= mouse.Y)
                 {
-                    pointSelected = i;
-                    XCoord.Text = trainingX[i][0].ToString();
-                    YCoord.Text = trainingX[i][1].ToString();
+                    highlightedPoint = i;
                     return;
                 }
             }
-            pointSelected = -1;
+            highlightedPoint = -1;
             if(prevoiusPoint!=-1)
                 DrawPoints();
         }
@@ -145,14 +191,20 @@ namespace Nauron
                 double y = main.Normalize(trainingX[i][1], yMin, yMax, height - 10, 10);
                 var point = new Ellipse
                 {
-                    Width = pointSelected==i? 12: 6,
-                    Height = pointSelected == i ? 12 : 6,
-                    Fill = trainingD[i] > 0 ? Brushes.Green : Brushes.Red,
+                    Width = pointSelected==i || highlightedPoint==i? 12: 6,
+                    Height = pointSelected == i || highlightedPoint == i ? 12 : 6,
+                    Fill = pointSelected == i? Brushes.Purple : trainingD[i] > 0 ? Brushes.Green : Brushes.Red,
+                    IsHitTestVisible = false
                 };
-                Canvas.SetLeft(point, x- (pointSelected == i ? 12 : 6)/2);
-                Canvas.SetTop(point, y- (pointSelected == i ? 12 : 6)/2);
+                Canvas.SetLeft(point, x- point.Width/ 2);
+                Canvas.SetTop(point, y- point.Width / 2);
                 DataPointsCanvas.Children.Add(point);
             }
+        }
+        void RecalculateMinMax(object sender, RoutedEventArgs e)
+        {
+            FindMinAndMaxPoint();
+            DrawPoints();
         }
         void FindMinAndMaxPoint()
         {
@@ -175,6 +227,10 @@ namespace Nauron
             xMin = Math.Floor(xMin);
             yMin = Math.Floor(yMin);
             yMax = Math.Ceiling(yMax);
+            xMax = xMax + (xMax - xMin) * 0.01;
+            yMax = yMax + (yMax - yMin) * 0.01;
+            xMin = xMin - ( xMax - xMin) * 0.01;
+            yMin = yMin - ( yMax - yMin) * 0.01;
         }
     }
 }
