@@ -59,23 +59,30 @@ namespace Nauron.Models
         }
         public void SaveFile(string path, Neuron neuron)
         {
-            try
+            var lines = new List<string>();
+            (var X, var D) = neuron.GetData();
+            if (neuron is Perceptron) lines.Add("P");
+            else lines.Add("A");
+            if (X != null)
             {
-                var lines = new List<string>();
-                (var X, var D) = neuron.GetData();
-                if (neuron is Perceptron) lines.Add("P");
-                else lines.Add("A");
                 for (int i = 0; i < X.Count; i++)
                 {
                     lines.Add(X[i][0] + " " + X[i][1] + " " + D[i]);
                 }
-                var W = neuron.GetWeights();
-                lines.Add(W[0] + " " + W[1] + " " + W[2]);
-                File.WriteAllLines(path, lines.ToArray());
+                var tEr = neuron.GetTrainingErrors();
+                if (tEr.Count > 0)
+                {
+                    lines.Add("E");
+                    foreach (var e in tEr)
+                    {
+                        lines.Add(e.ToString());
+                    }
+                }
             }
-            catch(Exception e){
-                MessageBox.Show("Wystąpił błąd:\n"+e.Message);
-            }
+            var W = neuron.GetWeights();
+            lines.Add(W[0] + " " + W[1] + " " + W[2]);
+
+            File.WriteAllLines(path, lines.ToArray());
         }
         public Neuron OpenFile(MainWindow main, string path)
         {
@@ -86,16 +93,33 @@ namespace Nauron.Models
                 main.FileNameBox.Text = "";
                 if (lines[0] == "P") n = new Perceptron(0); 
                 else n = new Adaline(0);
+                if(lines.Length>2){
                 List<List<double>> X = new();
                 List<double> D = new();
-                List<double> temp;
+                List<double> temp = new(); ;
+                bool errors=false;
                 for(int i=1;i<lines.Length-1;i++)
                 {
-                    temp= ArrayToDoubles(lines[i].Split());
-                    X.Add(new List<double>([temp[0], temp[1]]));
-                    D.Add(temp[2]);
+                    if (lines[i] == "E")
+                    {
+                        temp.Clear();
+                        errors = true; continue;
+                    }
+                    if(!errors)
+                    {
+                        temp= ArrayToDoubles(lines[i].Split());
+                        X.Add(new List<double>([temp[0], temp[1]]));
+                        D.Add(temp[2]);
+                    }
+                    else
+                    {
+                        temp.Add(Convert.ToDouble(lines[i]));
+                    }
                 }
-                n.newData(X, D);
+                    n.newData(X, D);
+                    if (errors)
+                        n.SetTrainingErrors(temp);
+                }
                 n.ChangeWeights(ArrayToDoubles(lines[lines.Length - 1].Split()).ToArray());
                 return n;
             }

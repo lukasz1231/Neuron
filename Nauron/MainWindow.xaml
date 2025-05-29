@@ -20,12 +20,15 @@
                     <MenuItem Header="Zapisz" Click="SaveButton" ToolTip="Ctrl+S"></MenuItem>
                     <MenuItem Header="Zapisz jako" Click="SaveAsButton" ToolTip="Ctrl+Shift+S"></MenuItem>
                     <MenuItem Header="Tryb trenowania">
-                        <CheckBox x:Name="CheckboxSingle" Checked="ChangeTrainingModeSingle"  Content="Pojedyncza iteracja" Margin="0,0,10,0"></CheckBox>
-                        <CheckBox x:Name="CheckboxIter" Checked="ChangeTrainingModeMaxIt" Content="Maksymalna liczba iteracji" Margin="0,0,10,0"></CheckBox>
+                        <CheckBox x:Name="CheckboxSingle" Checked="ChangeTrainingModeSingle"  Content="Pojedyncza iteracja"></CheckBox>
+                        <CheckBox x:Name="CheckboxIter" Checked="ChangeTrainingModeMaxIt" Content="Maksymalna liczba iteracji"></CheckBox>
                         <CheckBox x:Name="CheckboxErr" Checked="ChangeTrainingModeMaxErr" Content="Do błedu uczenia"></CheckBox>
                     </MenuItem>
                     <MenuItem Header="Funkcja aktywacji" Click="FunctionButton_Click"></MenuItem>
-                    <MenuItem Header="Typ neuronu"></MenuItem>
+                    <MenuItem Header="Typ neuronu">
+                        <CheckBox Content="Percepton"></CheckBox>
+                        <CheckBox Content="Adaline"></CheckBox>
+                    </MenuItem>
                     <MenuItem Header="Edytuj dane" Click="OpenDataEditor"></MenuItem>
                 </MenuItem>
             </Menu>

@@ -59,7 +59,7 @@ namespace Nauron.Models
         }
         public double SingleIterationTrain()
         {
-            if (W==null)
+            if (trainingX==null)
                 throw new ArgumentException("Nie wgrano danych");
 
             double sumSquaredError = 0.0;
@@ -146,6 +146,10 @@ namespace Nauron.Models
         }
         public List<double> GetTrainingErrors(){
             return trainingErrors;
+        }
+        public void SetTrainingErrors(List<double> er)
+        {
+            trainingErrors = er;
         }
         public (List<List<double>> trainingX, List<double> trainingD) GetData()
         {

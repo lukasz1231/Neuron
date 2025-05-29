@@ -259,8 +259,10 @@ namespace Nauron
             neuron.InitTrain();
             if (fileName != null && fileName != "")
                 Title = "Neuron " + fileName + "*";
-            DrawData();
-            DrawDecisionBoundary();
+            if(initialized){
+                DrawData();
+                DrawDecisionBoundary();
+            }
         }
 
         private void InitButton_Click(object sender, RoutedEventArgs e)
@@ -411,8 +413,16 @@ namespace Nauron
                     filePath = openFileDialog.FileName;
                     Title = "Neuron " + fileName;
                     neuron = dataManager.OpenFile(this, filePath);
-                    DrawData();
-                    DrawDecisionBoundary();
+                    (var x, var a) = neuron.GetData();
+                    if (x != null)
+                    {
+                        DrawData();
+                        DrawDecisionBoundary();
+                    }
+                    if(neuron.GetTrainingErrors().Count>0)
+                        DrawErrorPlot();
+                    else
+                        initialized = false;
                 }
             }
             catch(NullReferenceException e)
