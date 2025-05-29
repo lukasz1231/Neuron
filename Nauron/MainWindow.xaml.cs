@@ -1,9 +1,11 @@
-﻿using Nauron.Models;
+﻿using Microsoft.Win32;
+using Nauron.Models;
 using System;
 using System.ComponentModel;
 using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -28,6 +30,8 @@ namespace Nauron
         Neuron neuron;
         DataManager dataManager;
         double yMin, yMax, xMin, xMax;
+        bool initialized, shiftDown, sDown, ctrlDown, oDown;
+        string fileName, filePath;
         private void DrawAxesWithLabels(Canvas canvas, bool withX = true)
         {
             (trainingX, trainingD) = neuron.GetData();
@@ -224,7 +228,7 @@ namespace Nauron
         }
         private void OpenDataEditor(object sender, RoutedEventArgs e)
         {
-            if(!neuron.IsInitialized()){
+            if(!initialized){
                 MessageBox.Show("Błąd!\nWgraj dane");
                 return;
             }
@@ -241,6 +245,8 @@ namespace Nauron
         }
         void CloseDataEditor(object sender, CancelEventArgs e)
         {
+            if (fileName != null && fileName!="")
+                Title = "Neuron " + fileName + "*";
             DrawData();
             DrawDecisionBoundary();
         }
@@ -248,6 +254,15 @@ namespace Nauron
         {
             neuron.ChangeFunction(i);
         }
+        void ResetNeuronButton_Click(object sender, RoutedEventArgs e)
+        {
+            neuron.InitTrain();
+            if (fileName != null && fileName != "")
+                Title = "Neuron " + fileName + "*";
+            DrawData();
+            DrawDecisionBoundary();
+        }
+
         private void InitButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -255,7 +270,6 @@ namespace Nauron
                 string fileName = FileNameBox.Text.Trim(); 
                 (trainingX, trainingD) = dataManager.LoadData(fileName);
                 neuron.newData(trainingX, trainingD);
-                neuron.ChangeLearningRate(double.Parse(LearningRate.Text));
             }
             catch (ArgumentException ex)
             {
@@ -267,7 +281,9 @@ namespace Nauron
                 MessageBox.Show(ex.Message);
                 return;
             }
-            neuron.InitTrain();
+            if (fileName != null && fileName != "")
+                Title = "Neuron " + fileName + "*";
+            initialized = true;
             DrawData();
             DrawDecisionBoundary();
         }
@@ -299,6 +315,8 @@ namespace Nauron
                 MessageBox.Show(ex.Message);
                 return;
             }
+            if (fileName != null && fileName != "")
+                Title = "Neuron " + fileName + "*";
             ErrorText.Content = $"Trained with error: {error:F4}";
             DrawData();
             DrawDecisionBoundary();
@@ -334,12 +352,110 @@ namespace Nauron
         {
             return neuron;
         }
+        void KeyUpHandler(object sender, KeyEventArgs e)
+        {
+            switch (e.Key)
+            {
+                case Key.S: sDown = false; break;
+                case Key.LeftShift: shiftDown = false; break;
+                case Key.LeftCtrl: ctrlDown = false; break;
+                case Key.O: oDown = false; break;
+                default: break;
+            }
+        }
+        void KeyDownHandler(object sender, KeyEventArgs e)
+        {
+            switch (e.Key)
+            {
+                case Key.S: sDown = true; break;
+                case Key.LeftShift: shiftDown = true; break;
+                case Key.LeftCtrl: ctrlDown = true; break;
+                case Key.O: oDown = true; break;
+                default: break;
+            }
+            if (ctrlDown)
+            {
+                if(sDown){
+                    if (shiftDown)
+                    {
+                        SaveNewFile();
+                    }
+                    else
+                        SaveFile();
+                }
+                if (oDown)
+                    OpenFile();
+            }
+        }
+        public void SaveButton(object sender, RoutedEventArgs e)
+        {
+            SaveFile();
+        }
+        public void SaveAsButton(object sender, RoutedEventArgs e)
+        {
+            SaveNewFile();
+        }
+        void OpenButton(object sender, RoutedEventArgs e)
+        {
+            OpenFile();
+        }
+        void OpenFile()
+        {
+            try
+            {
+                OpenFileDialog openFileDialog = new OpenFileDialog();
+                openFileDialog.DefaultExt = ".nrn";
+                if (openFileDialog.ShowDialog() == true)
+                {
+                    fileName = openFileDialog.SafeFileName;
+                    filePath = openFileDialog.FileName;
+                    Title = "Neuron " + fileName;
+                    neuron = dataManager.OpenFile(this, filePath);
+                    DrawData();
+                    DrawDecisionBoundary();
+                }
+            }
+            catch(NullReferenceException e)
+            {
+                MessageBox.Show("Plik jest pusty");
+            }
 
+        }
+        void SaveNewFile()
+        {
+            shiftDown = sDown = ctrlDown = false;
+            var saveFileDialog = new SaveFileDialog();
+            saveFileDialog.InitialDirectory = System.IO.Path.GetFullPath("../../../Data/");
+            saveFileDialog.AddExtension = true;
+            saveFileDialog.DefaultExt = ".nrn";
+            if (saveFileDialog.ShowDialog() == true){
+                fileName = saveFileDialog.SafeFileName;
+                filePath = saveFileDialog.FileName;
+                Title = "Neuron "+ fileName;
+                dataManager.SaveFile(filePath, neuron);
+            }
+        }
+        void SaveFile()
+        {
+            shiftDown = sDown = ctrlDown = false;
+            if(fileName == null || fileName=="")
+            {
+                SaveNewFile();
+                return;
+            }
+            Title = "Neuron "+ fileName;
+            dataManager.SaveFile(filePath, neuron);
+        }
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            Title = "Neuron //New file";
+            initialized = false;
             CheckboxSingle.IsChecked = true;
+            shiftDown = sDown = ctrlDown = false;
             neuron = new Perceptron(0);
             dataManager = new DataManager();
+            KeyUp += new KeyEventHandler(KeyUpHandler);
+            KeyDown += new KeyEventHandler(KeyDownHandler);
         }
         public MainWindow()
         {

@@ -143,6 +143,12 @@ namespace Nauron.Models
         {
             return trainingErrors;
         }
+        public void ChangeWeights(double[] w)
+        {
+            w0 = w[0];
+            W[1] = w[1];
+            W[2] = w[2];
+        }
         public (List<List<double>> trainingX, List<double> trainingD) GetData()
         {
             return (trainingX, trainingD);

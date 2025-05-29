@@ -48,7 +48,7 @@ namespace Nauron
 
         public void ZapiszDane(object sender, RoutedEventArgs e)
         {
-            DataManager.SaveToFile(FileNameBox.Text, DataToString());
+            DataManager.SaveToFile(FileNameBox.Text, neuron);
             FindMinAndMaxPoint();
         }
         public void ZapiszDaneNeuron(object sender, CancelEventArgs e)
@@ -68,15 +68,6 @@ namespace Nauron
             pointSelected = -1;
             FindMinAndMaxPoint();
             DrawPoints();
-        }
-        string[] DataToString()
-        {
-            List<string> wynik = new(trainingD.Count);
-            for (int i = 0; i < trainingD.Count; i++)
-            {
-                wynik.Add($"{trainingX[i][0]} {trainingX[i][1]} {trainingD[i]}");
-            }
-            return wynik.ToArray();
         }
         public void CoordChangedX(object sender, RoutedEventArgs e)
         {

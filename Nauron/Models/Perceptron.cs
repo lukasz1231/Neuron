@@ -20,10 +20,10 @@ namespace Nauron.Models
             this.func = func;
             rand = new Random();
             trainingErrors = new List<double>();
+            W = new double[2];
         }
         public void InitTrain()
         {
-            W = new double[2];
             W[0] = rand.Next(1,11)+(rand.Next(2,30)*rand.NextDouble())/Math.Pow(10,rand.Next(2,10));
             W[1] = rand.Next(1,11)+(rand.Next(2,30)*rand.NextDouble())/Math.Pow(10,rand.Next(2,10));
 
@@ -121,6 +121,12 @@ namespace Nauron.Models
         {
             ;
         }
+        public void ChangeWeights(double[] w)
+        {
+            w0 = w[0];
+            W[0]= w[1];
+            W[1]= w[2];
+        }
         public void ChangeFunction(int func)
         {
             this.func = func;
@@ -137,10 +143,6 @@ namespace Nauron.Models
             w[1] = W[0];
             w[2] = W[1];
             return w;
-        }
-        public bool IsInitialized()
-        {
-            return W != null;
         }
         public List<double> GetTrainingErrors(){
             return trainingErrors;

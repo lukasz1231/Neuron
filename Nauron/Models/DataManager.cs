@@ -57,11 +57,63 @@ namespace Nauron.Models
 
             return (trainingX, trainingD);
         }
-
-        public static void SaveToFile(string fileName, string[] lines)
+        public void SaveFile(string path, Neuron neuron)
         {
             try
             {
+                var lines = new List<string>();
+                (var X, var D) = neuron.GetData();
+                if (neuron is Perceptron) lines.Add("P");
+                else lines.Add("A");
+                for (int i = 0; i < X.Count; i++)
+                {
+                    lines.Add(X[i][0] + " " + X[i][1] + " " + D[i]);
+                }
+                var W = neuron.GetWeights();
+                lines.Add(W[0] + " " + W[1] + " " + W[2]);
+                File.WriteAllLines(path, lines.ToArray());
+            }
+            catch(Exception e){
+                MessageBox.Show("Wystąpił błąd:\n"+e.Message);
+            }
+        }
+        public Neuron OpenFile(MainWindow main, string path)
+        {
+            var lines = File.ReadAllLines(path);
+            if (lines != null)
+            {
+                Neuron n;
+                main.FileNameBox.Text = "";
+                if (lines[0] == "P") n = new Perceptron(0); 
+                else n = new Adaline(0);
+                List<List<double>> X = new();
+                List<double> D = new();
+                List<double> temp;
+                for(int i=1;i<lines.Length-1;i++)
+                {
+                    temp= ArrayToDoubles(lines[i].Split());
+                    X.Add(new List<double>([temp[0], temp[1]]));
+                    D.Add(temp[2]);
+                }
+                n.newData(X, D);
+                n.ChangeWeights(ArrayToDoubles(lines[lines.Length - 1].Split()).ToArray());
+                return n;
+            }
+            throw new NullReferenceException();
+        }
+        List<double> ArrayToDoubles(string[] words)
+        {
+            List<double> a = new();
+            foreach (string word in words) {
+                a.Add(Convert.ToDouble(word));
+            }
+            return a;
+        }
+        public static void SaveToFile(string fileName, Neuron n)
+        {
+            try
+            {
+                var lines = DataToString(n);
                 string filePath = Path.Combine("../../../Data/", fileName);
                 if (File.Exists(filePath))
                 {
@@ -75,6 +127,22 @@ namespace Nauron.Models
             {
                 MessageBox.Show($"Błąd zapisu do pliku: {ex.Message}");
             }
+        }
+        static string[] DataToString(Neuron n)
+        {
+            List<string> wynik;
+            if (n != null)
+            {
+                (var trainingX, var trainingD) = n.GetData();
+                wynik = new(trainingD.Count);
+                for (int i = 0; i < trainingD.Count; i++)
+                {
+                    wynik.Add($"{trainingX[i][0]} {trainingX[i][1]} {trainingD[i]}");
+                }
+            }
+            else
+                wynik = new List<string>([""]);
+            return wynik.ToArray();
         }
     }
 }

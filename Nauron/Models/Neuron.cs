@@ -10,10 +10,11 @@ public interface Neuron
     public double TrainToBias(double biasToleration, long maxIterations);
     public double TrainToIterations(long maxIterations);
     public double SingleIterationTrain();
-    public bool IsInitialized();
     public double Calculate(int index);
     public void ChangeLearningRate(double s);
     public void ChangeFunction(int func);
+    public void ChangeWeights(double[] weights);
+
     public void newData(List<List<double>> trainingX, List<double> trainingD);
     public double[] GetWeights();
     public List<double> GetTrainingErrors();
