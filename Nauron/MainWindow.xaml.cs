@@ -179,6 +179,22 @@ namespace Nauron
                 yTemp = -W[1] / W[2] * x - W[0] / W[2];
                 x = Normalize(i, 0, trainingX.Count-1, 10, width - 10);
                 y = Normalize(yTemp, yMin, yMax, height - 10, 10);
+                if (y < 10)
+                {
+                    if (W[1] == 0) W[1] = 0.0000001;
+                    y = Normalize(10, height - 10, 10, yMin, yMax);
+                    x = -W[2] / W[1] * y - W[0] / W[1];
+                    y = 0;
+                    x = Normalize(x, xMin, xMax, 10, width - 10);
+                }
+                if (y > height - 10)
+                {
+                    if (W[1] == 0) W[1] = 0.0000001;
+                    y = Normalize(height - 10, height - 10, 10, yMin, yMax);
+                    x = -W[2] / W[1] * y - W[0] / W[1];
+                    y = height;
+                    x = Normalize(x, xMin, xMax, 10, width - 10);
+                }
                 polyline.Points.Add(new Point(x, y));
             }
             polyline.Clip = PlotCanvas.Clip;
