@@ -14,8 +14,8 @@ public interface Neuron
     public double Calculate(int index);
     public void ChangeLearningRate(double s);
     public void ChangeFunction(int func);
-    public void newData(List<List<double>> trainingX, double[] trainingD, List<List<double>> testingX, double[] testingD);
+    public void newData(List<List<double>> trainingX, List<double> trainingD);
     public double[] GetWeights();
     public List<double> GetTrainingErrors();
-    public (List<List<double>> trainingX, double[] trainingD, List<List<double>> testingX, double[] testingD) GetData();
+    public (List<List<double>> trainingX, List<double> trainingD) GetData();
 }

@@ -1,4 +1,5 @@
 ﻿using Nauron.Models;
+using System.ComponentModel;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
@@ -32,11 +33,12 @@ namespace Nauron
             KeyDown += new KeyEventHandler(KeyDownHandler);
             KeyUp += new KeyEventHandler(KeyUpHandler);
             neuron = main.GetNeuron();
-            (trainingX, var list, var a, var b) = neuron.GetData();
+            (trainingX, var list) = neuron.GetData();
             foreach (var item in list)
             {
                 trainingD.Add(item);
             }
+            Closing += new CancelEventHandler(ZapiszDaneNeuron);
             pointSelected = -1;
             highlightedPoint = -1;
             shiftDown = false;
@@ -49,10 +51,23 @@ namespace Nauron
             DataManager.SaveToFile(FileNameBox.Text, DataToString());
             FindMinAndMaxPoint();
         }
-        public void ZapiszDaneNeuron(object sender, RoutedEventArgs e)
+        public void ZapiszDaneNeuron(object sender, CancelEventArgs e)
         {
-            neuron.newData(trainingX, trainingD.ToArray(), null, null);
+            neuron.newData(trainingX, trainingD);
             main.SetNeuron(neuron);
+        }
+        void UsunPunkt(object sender, RoutedEventArgs e)
+        {
+            if(pointSelected == -1)
+            {
+                MessageBox.Show("Nie wybrano punktu");
+                return;
+            }
+            trainingD.RemoveAt(pointSelected);
+            trainingX.RemoveAt(pointSelected);
+            pointSelected = -1;
+            FindMinAndMaxPoint();
+            DrawPoints();
         }
         string[] DataToString()
         {
@@ -91,10 +106,21 @@ namespace Nauron
         }
         public void ZmienZbior(object sender, RoutedEventArgs e)
         {
-            if (DButton.Background == Brushes.Red)
+            if (DButton.Background == Brushes.Red){
                 DButton.Background = Brushes.Green;
-            else
+                if (pointSelected != -1){
+                    trainingD[pointSelected] = 1;
+                    DrawPoints();
+                }
+            }
+            else{
                 DButton.Background = Brushes.Red;
+                if(pointSelected != -1) {
+                    trainingD[pointSelected] = 0;
+                    DrawPoints();
+                }
+            }
+
         }
         public void DodajPunkt(object sender, RoutedEventArgs e)
         {
@@ -113,6 +139,7 @@ namespace Nauron
                 if (prevoiusPoint != pointSelected){
                     XCoord.Text = trainingX[pointSelected][0].ToString();
                     YCoord.Text = trainingX[pointSelected][1].ToString();
+                    DButton.Background = trainingD[pointSelected] == 1 ? Brushes.Green : Brushes.Red;
                     DrawPoints();
                 }
             }
@@ -193,7 +220,7 @@ namespace Nauron
                 {
                     Width = pointSelected==i || highlightedPoint==i? 12: 6,
                     Height = pointSelected == i || highlightedPoint == i ? 12 : 6,
-                    Fill = pointSelected == i? Brushes.Purple : trainingD[i] > 0 ? Brushes.Green : Brushes.Red,
+                    Fill = trainingD[i] > 0 ? pointSelected == i ? Brushes.YellowGreen : Brushes.Green : pointSelected == i ? Brushes.MediumVioletRed :  Brushes.Red,
                     IsHitTestVisible = false
                 };
                 Canvas.SetLeft(point, x- point.Width/ 2);

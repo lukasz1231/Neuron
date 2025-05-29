@@ -11,7 +11,7 @@ namespace Nauron.Models
 {
     internal class DataManager
     {
-        public (List<List<double>> trainingX, double[] trainingD, List<List<double>> testingX, double[] testingD)
+        public (List<List<double>> trainingX, List<double> trainingD)
             LoadData(string fileName)
         {
             string filePath = Path.Combine("../../../Data/", fileName);
@@ -51,17 +51,11 @@ namespace Nauron.Models
             var rand = new Random();
             allData = allData.OrderBy(_ => rand.Next()).ToList();
 
-            int trainCount = (int)(allData.Count * 1);
 
-            var trainingData = allData.Take(trainCount).ToArray();
-            var testingData = allData.Skip(trainCount).ToArray();
+            List<List<double>> trainingX = allData.Select(d => d.x).ToList();
+            List<double> trainingD = allData.Select(d => d.d).ToList();
 
-            List<List<double>> trainingX = trainingData.Select(d => d.x).ToList();
-            double[] trainingD = trainingData.Select(d => d.d).ToArray();
-            List<List<double>> testingX = testingData.Select(d => d.x).ToList();
-            double[] testingD = testingData.Select(d => d.d).ToArray();
-
-            return (trainingX, trainingD, testingX, testingD);
+            return (trainingX, trainingD);
         }
 
         public static void SaveToFile(string fileName, string[] lines)

@@ -9,9 +9,7 @@ namespace Nauron.Models
     internal class Perceptron : Neuron
     {
         List<List<double>> trainingX;
-        double[] trainingD;
-        List<List<double>> testingX;
-        double[] testingD;
+        List<double> trainingD;
         double[] W;
         double w0;
         double trainedError;
@@ -62,7 +60,7 @@ namespace Nauron.Models
         public double SingleIterationTrain()
         {
             if (W==null)
-                throw new ArgumentException("Nie zainicjalizowano danych");
+                throw new ArgumentException("Nie wgrano danych");
 
             double sumSquaredError = 0.0;
             for (int t = 0; t < trainingX.Count; t++)
@@ -127,12 +125,10 @@ namespace Nauron.Models
         {
             this.func = func;
         }
-        public void newData(List<List<double>> trainingX, double[] trainingD, List<List<double>> testingX, double[] testingD)
+        public void newData(List<List<double>> trainingX, List<double> trainingD)
         {
             this.trainingX = trainingX;
-            this.testingX = testingX;
             this.trainingD = trainingD;
-            this.testingD = testingD;
         }
         public double[] GetWeights()
         {
@@ -149,9 +145,9 @@ namespace Nauron.Models
         public List<double> GetTrainingErrors(){
             return trainingErrors;
         }
-        public (List<List<double>> trainingX, double[] trainingD, List<List<double>> testingX, double[] testingD) GetData()
+        public (List<List<double>> trainingX, List<double> trainingD) GetData()
         {
-            return (trainingX, trainingD, testingX, testingD);
+            return (trainingX, trainingD);
         }
     }
 }

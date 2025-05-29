@@ -1,5 +1,6 @@
 ﻿using Nauron.Models;
 using System;
+using System.ComponentModel;
 using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Text;
@@ -21,9 +22,7 @@ namespace Nauron
     public partial class MainWindow : Window
     {
         List<List<double>> trainingX;
-        double[] trainingD;
-        List<List<double>> testingX;
-        double[] testingD;
+        List<double> trainingD;
         FunctionSelector fs;
         DataEditor de;
         Neuron neuron;
@@ -31,7 +30,7 @@ namespace Nauron
         double yMin, yMax, xMin, xMax;
         private void DrawAxesWithLabels(Canvas canvas, bool withX = true)
         {
-            (trainingX, trainingD, testingX, testingD) = neuron.GetData();
+            (trainingX, trainingD) = neuron.GetData();
             double width = canvas.ActualWidth;
             double height = canvas.ActualHeight;
 
@@ -135,7 +134,7 @@ namespace Nauron
             PlotCanvas.Children.Clear();
             DrawAxesWithLabels(PlotCanvas); // Dodanie osi z etykietami
 
-            (trainingX, trainingD, testingX, testingD) = neuron.GetData();
+            (trainingX, trainingD) = neuron.GetData();
             double width = PlotCanvas.ActualWidth;
             double height = PlotCanvas.ActualHeight;
             for (int i = 0; i < trainingX.Count; i++)
@@ -160,7 +159,7 @@ namespace Nauron
         {
             double width = PlotCanvas.ActualWidth;
             double height = PlotCanvas.ActualHeight;
-            (trainingX, trainingD, testingX, testingD) = neuron.GetData();
+            (trainingX, trainingD) = neuron.GetData();
             var W = neuron.GetWeights();
             double x, y, yTemp;
             Polyline polyline = new Polyline
@@ -170,7 +169,7 @@ namespace Nauron
                 StrokeDashArray = new DoubleCollection { 2 }
             };
             if (W[2] == 0) W[2]=0.0000001;
-            for (int i = 0; i < trainingX.Count; i++)
+            for (int i = 0; i < trainingX.Count; i+=trainingX.Count-1)
             {
                 x = Normalize(i, 0, trainingX.Count - 1, xMin, xMax);
                 yTemp = -W[1] / W[2] * x - W[0] / W[2];
@@ -178,7 +177,7 @@ namespace Nauron
                 y = Normalize(yTemp, yMin, yMax, height - 10, 10);
                 polyline.Points.Add(new Point(x, y));
             }
-            polyline.ClipToBounds = true;
+            polyline.Clip = PlotCanvas.Clip;
             PlotCanvas.Children.Add(polyline);
         }
         private void DrawErrorPlot()
@@ -226,7 +225,7 @@ namespace Nauron
         private void OpenDataEditor(object sender, RoutedEventArgs e)
         {
             if(!neuron.IsInitialized()){
-                MessageBox.Show("Błąd!\nZainicjalizuj dane");
+                MessageBox.Show("Błąd!\nWgraj dane");
                 return;
             }
             if (de == null) de = new DataEditor(this);
@@ -238,6 +237,12 @@ namespace Nauron
                     }
                     de.Show();
                 }
+            de.Closing += new CancelEventHandler(CloseDataEditor);
+        }
+        void CloseDataEditor(object sender, CancelEventArgs e)
+        {
+            DrawData();
+            DrawDecisionBoundary();
         }
         public void ChangeFunction(int i)
         {
@@ -248,8 +253,8 @@ namespace Nauron
             try
             {
                 string fileName = FileNameBox.Text.Trim(); 
-                (trainingX, trainingD, testingX, testingD) = dataManager.LoadData(fileName);
-                neuron.newData(trainingX, trainingD, testingX, testingD);
+                (trainingX, trainingD) = dataManager.LoadData(fileName);
+                neuron.newData(trainingX, trainingD);
                 neuron.ChangeLearningRate(double.Parse(LearningRate.Text));
             }
             catch (ArgumentException ex)
@@ -263,6 +268,8 @@ namespace Nauron
                 return;
             }
             neuron.InitTrain();
+            DrawData();
+            DrawDecisionBoundary();
         }
         private void TrainButton_Click(object sender, RoutedEventArgs e)
         {
