@@ -288,7 +288,6 @@ namespace Nauron
                 string fileName = FileNameBox.Text.Trim(); 
                 (trainingX, trainingD) = dataManager.LoadData(fileName);
                 neuron.newData(trainingX, trainingD);
-                neuron.ChangeLearningRate(double.Parse(LearningRate.Text));
             }
             catch (ArgumentException ex)
             {
@@ -300,10 +299,6 @@ namespace Nauron
                 MessageBox.Show(ex.Message);
                 return;
             }
-            catch (FormatException ex)
-            {
-                MessageBox.Show("Nie podano poprawnego formatu (np. 0,1)\n"+ex.Message);
-            }
             if (fileName != null && fileName != "")
                 Title = "Neuron " + fileName + "*";
             initialized = true;
@@ -313,9 +308,9 @@ namespace Nauron
         private void TrainButton_Click(object sender, RoutedEventArgs e)
         {
             double error;
-            neuron.ChangeLearningRate(double.Parse(LearningRate.Text));
             try
             {
+                neuron.ChangeLearningRate(double.Parse(LearningRate.Text));
                 if (CheckboxErr.IsChecked ?? false){
                     error = neuron.TrainToBias(double.Parse(MaxErrorBox.Text), long.Parse(MaxIterBox.Text));
                 }
@@ -338,6 +333,10 @@ namespace Nauron
             {
                 MessageBox.Show(ex.Message);
                 return;
+            }
+            catch (FormatException ex)
+            {
+                MessageBox.Show("Nie podano poprawnego formatu (np. 0,1)\n" + ex.Message);
             }
             if (fileName != null && fileName != "")
                 Title = "Neuron " + fileName + "*";
