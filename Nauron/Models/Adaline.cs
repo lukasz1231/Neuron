@@ -22,10 +22,10 @@ namespace Nauron.Models
             this.func = func;
             rand = new Random();
             trainingErrors = new List<double>();
+            W = new double[2];
         }
         public void InitTrain()
         {
-            W = new double[2];
             W[0] = rand.Next(1, 11) + (rand.Next(2, 30) * rand.NextDouble()) / Math.Pow(10, rand.Next(2, 10));
             W[1] = rand.Next(1, 11) + (rand.Next(2, 30) * rand.NextDouble()) / Math.Pow(10, rand.Next(2, 10));
 
@@ -61,10 +61,10 @@ namespace Nauron.Models
         }
         public double SingleIterationTrain()
         {
-            if (W == null)
-                throw new ArgumentException("Nie zainicjalizowano danych");
+            if (trainingX == null)
+                throw new ArgumentException("Nie wgrano danych");
             if (learningRate == 0.0)
-                throw new ArgumentException("Nie zainicjalizowano danych lub nie podano tempa uczenia");
+                throw new ArgumentException("Nie podano tempa uczenia");
 
             double sumSquaredError = 0.0;
             for (int t = 0; t < trainingX.Count; t++)
@@ -122,6 +122,12 @@ namespace Nauron.Models
         {
             learningRate = s;
         }
+        public void ChangeWeights(double[] w)
+        {
+            w0 = w[0];
+            W[0] = w[1];
+            W[1] = w[2];
+        }
         public void ChangeFunction(int func)
         {
             this.func = func;
@@ -147,19 +153,13 @@ namespace Nauron.Models
         {
             trainingErrors = er;
         }
-        public void ChangeWeights(double[] w)
-        {
-            w0 = w[0];
-            W[1] = w[1];
-            W[2] = w[2];
-        }
         public (List<List<double>> trainingX, List<double> trainingD) GetData()
         {
             return (trainingX, trainingD);
         }
-        public bool IsInitialized()
+        public int GetFunction()
         {
-            return W != null;
+            return func;
         }
     }
 }

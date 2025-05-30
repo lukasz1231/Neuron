@@ -288,6 +288,7 @@ namespace Nauron
                 string fileName = FileNameBox.Text.Trim(); 
                 (trainingX, trainingD) = dataManager.LoadData(fileName);
                 neuron.newData(trainingX, trainingD);
+                neuron.ChangeLearningRate(double.Parse(LearningRate.Text));
             }
             catch (ArgumentException ex)
             {
@@ -298,6 +299,10 @@ namespace Nauron
             {
                 MessageBox.Show(ex.Message);
                 return;
+            }
+            catch (FormatException ex)
+            {
+                MessageBox.Show("Nie podano poprawnego formatu (np. 0,1)\n"+ex.Message);
             }
             if (fileName != null && fileName != "")
                 Title = "Neuron " + fileName + "*";
@@ -405,6 +410,27 @@ namespace Nauron
                     OpenFile();
             }
         }
+        public void ChangeNeuronP(object sender, RoutedEventArgs e)
+        {
+            if (neuron is Perceptron) return;
+
+            AdalCheckbox.IsChecked = false;
+            var perc = new Perceptron(neuron.GetFunction());
+            perc.ChangeWeights(neuron.GetWeights());
+            (var X, var D) = neuron.GetData();
+            perc.newData(X,D);
+            neuron = perc;
+        }
+        public void ChangeNeuronA(object sender, RoutedEventArgs e)
+        {
+            if (neuron is Adaline) return;
+            PercCheckbox.IsChecked = false;
+            var adal = new Adaline(neuron.GetFunction());
+            adal.ChangeWeights(neuron.GetWeights());
+            (var X, var D) = neuron.GetData();
+            adal.newData(X, D);
+            neuron = adal;
+        }
         public void SaveButton(object sender, RoutedEventArgs e)
         {
             SaveFile();
@@ -482,6 +508,7 @@ namespace Nauron
             dataManager = new DataManager();
             KeyUp += new KeyEventHandler(KeyUpHandler);
             KeyDown += new KeyEventHandler(KeyDownHandler);
+            PercCheckbox.IsChecked = true;
         }
         public MainWindow()
         {

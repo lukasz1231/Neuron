@@ -26,8 +26,8 @@
                     </MenuItem>
                     <MenuItem Header="Funkcja aktywacji" Click="FunctionButton_Click"></MenuItem>
                     <MenuItem Header="Typ neuronu">
-                        <CheckBox Content="Percepton"></CheckBox>
-                        <CheckBox Content="Adaline"></CheckBox>
+                        <CheckBox x:Name="PercCheckbox" Content="Percepton" Checked="ChangeNeuronP"></CheckBox>
+                        <CheckBox x:Name="AdalCheckbox" Content="Adaline" Checked="ChangeNeuronA"></CheckBox>
                     </MenuItem>
                     <MenuItem Header="Edytuj dane" Click="OpenDataEditor"></MenuItem>
                 </MenuItem>

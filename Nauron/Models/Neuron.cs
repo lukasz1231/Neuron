@@ -19,5 +19,6 @@ public interface Neuron
     public double[] GetWeights();
     public List<double> GetTrainingErrors();
     public void SetTrainingErrors(List<double> er);
+    public int GetFunction();
     public (List<List<double>> trainingX, List<double> trainingD) GetData();
 }

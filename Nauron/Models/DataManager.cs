@@ -61,8 +61,8 @@ namespace Nauron.Models
         {
             var lines = new List<string>();
             (var X, var D) = neuron.GetData();
-            if (neuron is Perceptron) lines.Add("P");
-            else lines.Add("A");
+            if (neuron is Perceptron) lines.Add("P"+" "+neuron.GetFunction());
+            else lines.Add("A" + " " + neuron.GetFunction());
             if (X != null)
             {
                 for (int i = 0; i < X.Count; i++)
@@ -91,8 +91,9 @@ namespace Nauron.Models
             {
                 Neuron n;
                 main.FileNameBox.Text = "";
-                if (lines[0] == "P") n = new Perceptron(0); 
-                else n = new Adaline(0);
+                var split = lines[0].Split();
+                if (split[0] == "P") n = new Perceptron(Convert.ToInt32(split[1]));
+                else n = new Adaline(Convert.ToInt32(split[1]));
                 if(lines.Length>2){
                 List<List<double>> X = new();
                 List<double> D = new();

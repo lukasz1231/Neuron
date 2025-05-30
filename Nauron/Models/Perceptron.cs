@@ -155,5 +155,9 @@ namespace Nauron.Models
         {
             return (trainingX, trainingD);
         }
+        public int GetFunction()
+        {
+            return func;
+        }
     }
 }
