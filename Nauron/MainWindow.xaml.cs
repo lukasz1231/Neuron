@@ -337,6 +337,7 @@ namespace Nauron
             catch (FormatException ex)
             {
                 MessageBox.Show("Nie podano poprawnego formatu (np. 0,1)\n" + ex.Message);
+                return;
             }
             if (fileName != null && fileName != "")
                 Title = "Neuron " + fileName + "*";
