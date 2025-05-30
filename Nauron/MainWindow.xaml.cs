@@ -313,6 +313,7 @@ namespace Nauron
         private void TrainButton_Click(object sender, RoutedEventArgs e)
         {
             double error;
+            neuron.ChangeLearningRate(double.Parse(LearningRate.Text));
             try
             {
                 if (CheckboxErr.IsChecked ?? false){
@@ -429,7 +430,6 @@ namespace Nauron
             adal.ChangeWeights(neuron.GetWeights());
             (var X, var D) = neuron.GetData();
             adal.newData(X, D);
-            adal.ChangeLearningRate(double.Parse(LearningRate.Text));
             neuron = adal;
         }
         public void SaveButton(object sender, RoutedEventArgs e)
