@@ -288,7 +288,6 @@ namespace Nauron
                 string fileName = FileNameBox.Text.Trim(); 
                 (trainingX, trainingD) = dataManager.LoadData(fileName);
                 neuron.newData(trainingX, trainingD);
-                neuron.ChangeLearningRate(double.Parse(LearningRate.Text));
             }
             catch (ArgumentException ex)
             {
@@ -299,10 +298,6 @@ namespace Nauron
             {
                 MessageBox.Show(ex.Message);
                 return;
-            }
-            catch (FormatException ex)
-            {
-                MessageBox.Show("Nie podano poprawnego formatu (np. 0,1)\n"+ex.Message);
             }
             if (fileName != null && fileName != "")
                 Title = "Neuron " + fileName + "*";
@@ -315,6 +310,7 @@ namespace Nauron
             double error;
             try
             {
+                neuron.ChangeLearningRate(double.Parse(LearningRate.Text));
                 if (CheckboxErr.IsChecked ?? false){
                     error = neuron.TrainToBias(double.Parse(MaxErrorBox.Text), long.Parse(MaxIterBox.Text));
                 }
@@ -336,6 +332,11 @@ namespace Nauron
             catch (FileNotFoundException ex)
             {
                 MessageBox.Show(ex.Message);
+                return;
+            }
+            catch (FormatException ex)
+            {
+                MessageBox.Show("Nie podano poprawnego formatu (np. 0,1)\n" + ex.Message);
                 return;
             }
             if (fileName != null && fileName != "")
