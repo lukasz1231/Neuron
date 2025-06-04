@@ -17,7 +17,6 @@ namespace Nauron.Models
         List<double> trainingErrors;
         Random rand;
         double learningRate;
-        long maxiterations = 100;
         public Adaline(int func)
         {
             this.func = func;
@@ -50,12 +49,12 @@ namespace Nauron.Models
         }
         public double TrainToIterations(long maxIterations)
         {
-            maxiterations = maxIterations;
-            if (maxiterations <= 0)
+            if (maxIterations <= 0)
                 throw new ArgumentException("Maksymalna liczba iteracji mniejsza lub równa 0");
 
-            while (maxiterations > 0)
+            while (maxIterations >= 0)
             {
+                maxIterations--;
                 SingleIterationTrain();
             }
             return trainedError;
@@ -66,7 +65,7 @@ namespace Nauron.Models
                 throw new ArgumentException("Nie wgrano danych");
             if (learningRate == 0.0)
                 throw new ArgumentException("Nie podano tempa uczenia");
-            maxiterations--;
+
             double sumSquaredError = 0.0;
             for (int t = 0; t < trainingX.Count; t++)
             {
