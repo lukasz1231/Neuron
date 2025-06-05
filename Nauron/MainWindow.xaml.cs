@@ -551,7 +551,7 @@ namespace Nauron
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             if(!Directory.Exists("Data"))
-            Directory.CreateDirectory("Data");
+                Directory.CreateDirectory("Data");
             Title = "Neuron //New file";
             initialized = false;
             CheckboxSingle.IsChecked = true;
