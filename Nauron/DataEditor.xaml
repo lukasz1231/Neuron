@@ -18,7 +18,7 @@
             <Button Content="Oblicz granice ponownie" Margin="10,0,0,0" Click="RecalculateMinMax"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal" Grid.Row="1">
-            <TextBox x:Name="FileNameBox" Width="80" Text="data1.txt" />
+            <TextBox x:Name="FileNameBox" Width="80" Text="data1.tab" />
             <Button Content="Zapisz dane do pliku" Margin="10,0,0,0" Click="ZapiszDane"/>
             <Label Content="Koordynaty ostatniego punktu: "/>
             <TextBox x:Name="XCoord" Width="40" TextChanged="CoordChangedX" />

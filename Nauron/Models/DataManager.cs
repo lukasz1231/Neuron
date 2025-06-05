@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -26,6 +27,8 @@ namespace Nauron.Models
             double d;
             foreach (var line in lines)
             {
+                if (line==String.Empty || !Int32.TryParse(line[0].ToString(), out var r))
+                    continue;
                 var parts = line.Trim().Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
                 if (parts.Length < 2) continue;
                 stack.Clear();
@@ -45,7 +48,7 @@ namespace Nauron.Models
                 {
                     throw new ArgumentException("Niepoprawna wartość wzorcowa w wierszu "+(allData.Count+1));
                 }
-                allData.Add((stack.ToList(), d));
+                allData.Add((stack.Reverse().ToList(), d));
             }
 
             var rand = new Random();
@@ -137,7 +140,7 @@ namespace Nauron.Models
         public static void SaveToFile(string fileName, Neuron n)
         {
             try
-            {
+            { 
                 var lines = DataToString(n);
                 string filePath = Path.Combine("Data/", fileName);
                 if (File.Exists(filePath))
@@ -159,10 +162,14 @@ namespace Nauron.Models
             if (n != null)
             {
                 (var trainingX, var trainingD) = n.GetData();
-                wynik = new(trainingD.Count);
+                wynik = new(trainingD.Count+4);
+                wynik.Add("x1: a");
+                wynik.Add("x2: a");
+                wynik.Add("class: d");
+                wynik.Add("");
                 for (int i = 0; i < trainingD.Count; i++)
                 {
-                    wynik.Add($"{trainingX[i][0]} {trainingX[i][1]} {trainingD[i]}");
+                    wynik.Add($"{trainingX[i][0].ToString(CultureInfo.InvariantCulture)} {trainingX[i][1].ToString(CultureInfo.InvariantCulture)} {trainingD[i].ToString(CultureInfo.InvariantCulture)}");
                 }
             }
             else

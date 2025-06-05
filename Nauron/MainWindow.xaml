@@ -45,7 +45,7 @@
             </Menu>
         </StackPanel>
         <StackPanel Orientation="Horizontal" Margin="10" Grid.Row="1" VerticalAlignment="Top">
-            <TextBox x:Name="FileNameBox" Width="150" Text="data1.txt"/>
+            <TextBox x:Name="FileNameBox" Width="150" Text="data1.tab"/>
             <TextBox x:Name="MaxErrorBox" Width="80" Text="0,1" Margin="0,0,10,0" ToolTip="Maksymalny błąd"/>
             <TextBox x:Name="MaxIterBox" Width="80" Text="100" Margin="30,0,40,0" ToolTip="Maksymalna liczba iteracji"/>
             <Button Content="Wgraj dane z pliku" Click="InitButton_Click"/>
