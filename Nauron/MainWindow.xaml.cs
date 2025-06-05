@@ -527,7 +527,7 @@ namespace Nauron
         {
             shiftDown = sDown = ctrlDown = false;
             var saveFileDialog = new SaveFileDialog();
-            saveFileDialog.InitialDirectory = System.IO.Path.GetFullPath("../../../Data/");
+            saveFileDialog.InitialDirectory = System.IO.Path.GetFullPath("Data/");
             saveFileDialog.AddExtension = true;
             saveFileDialog.DefaultExt = ".nrn";
             if (saveFileDialog.ShowDialog() == true){
