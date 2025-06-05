@@ -14,7 +14,7 @@ namespace Nauron.Models
         public (List<List<double>> trainingX, List<double> trainingD)
             LoadData(string fileName)
         {
-            string filePath = Path.Combine("../../../Data/", fileName);
+            string filePath = Path.Combine("Data/", fileName);
             if (!File.Exists(filePath))
             {
                 throw new FileNotFoundException($"Plik {fileName} nie istnieje.");
@@ -139,7 +139,7 @@ namespace Nauron.Models
             try
             {
                 var lines = DataToString(n);
-                string filePath = Path.Combine("../../../Data/", fileName);
+                string filePath = Path.Combine("Data/", fileName);
                 if (File.Exists(filePath))
                 {
                     var result=MessageBox.Show($"Plik {fileName} już istnije.\nCzy chcesz go nadpisać?", "Plik istnieje", MessageBoxButton.YesNo);
