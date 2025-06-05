@@ -24,7 +24,14 @@
                         <CheckBox x:Name="CheckboxIter" Checked="ChangeTrainingModeMaxIt" Content="Maksymalna liczba iteracji"></CheckBox>
                         <CheckBox x:Name="CheckboxErr" Checked="ChangeTrainingModeMaxErr" Content="Do błedu uczenia"></CheckBox>
                     </MenuItem>
-                    <MenuItem Header="Funkcja aktywacji" Click="FunctionButton_Click"></MenuItem>
+                    <MenuItem Header="Funkcja aktywacji">
+                        <CheckBox x:Name="btnStepBinary" Content="StepBinary" Click="FunctionChangeAction"></CheckBox>
+                        <CheckBox x:Name="btnStepBipolar" Content="StepBipolar" Click="FunctionChangeAction"></CheckBox>
+                        <CheckBox x:Name="btnSigmoid" Content="Sigmoid" Click="FunctionChangeAction"></CheckBox>
+                        <CheckBox x:Name="btnTanh" Content="Tanh" Click="FunctionChangeAction"></CheckBox>
+                        <CheckBox x:Name="btnReLU" Content="ReLU" Click="FunctionChangeAction"></CheckBox>
+                        <CheckBox x:Name="btnLeakyReLU"  Content="Leaky ReLU" Click="FunctionChangeAction"></CheckBox>
+                    </MenuItem>
                     <MenuItem Header="Typ neuronu">
                         <CheckBox x:Name="PercCheckbox" Content="Percepton" Checked="ChangeNeuronP"></CheckBox>
                         <CheckBox x:Name="AdalCheckbox" Content="Adaline" Checked="ChangeNeuronA"></CheckBox>

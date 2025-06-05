@@ -25,7 +25,6 @@ namespace Nauron
     {
         List<List<double>> trainingX;
         List<double> trainingD;
-        FunctionSelector fs;
         DataEditor de;
         Neuron neuron;
         DataManager dataManager;
@@ -232,16 +231,7 @@ namespace Nauron
 
             ErrorPlotCanvas.Children.Add(polyline);
         }
-        private void FunctionButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (fs == null) fs = new FunctionSelector(this);
-            if(!fs.IsActive){
-                if(!fs.IsLoaded){
-                    fs = new FunctionSelector(this);
-                }
-                fs.Show();
-            }
-        }
+
         private void OpenDataEditor(object sender, RoutedEventArgs e)
         {
             if(!initialized){
@@ -361,7 +351,31 @@ namespace Nauron
             CheckboxSingle.IsChecked= false;
             CheckboxIter.IsChecked= false;
         }
-        
+        void UncheckOtherFUnctions(object wybrany)
+        {
+            CheckBox[] functions = new[] { btnStepBinary, btnStepBipolar, btnSigmoid, btnTanh, btnReLU, btnLeakyReLU };
+            foreach (CheckBox wybor in functions)
+            {
+                if(wybor!=wybrany)
+                    wybor.IsChecked = false;
+            }
+        }
+        void FunctionChangeAction(object sender, RoutedEventArgs e)
+        {
+            if(e.Source == btnStepBinary)
+                ChangeFunction(0);
+            else if(e.Source == btnStepBipolar)
+                ChangeFunction(1);
+            else if(e.Source == btnSigmoid)
+                ChangeFunction(2);
+            else if(e.Source == btnTanh)
+                ChangeFunction(3);
+            else if(e.Source == btnReLU)
+                ChangeFunction(4);
+            else if(e.Source == btnLeakyReLU)
+                ChangeFunction(5);
+            UncheckOtherFUnctions(e.Source);
+        }
         public double Normalize(double value, double min, double max, double targetMin, double targetMax)
         {
             if (min == max)
@@ -444,6 +458,19 @@ namespace Nauron
         {
             OpenFile();
         }
+        bool isFileExtensionCorrect(string filename)
+        {
+            if (filename.Length < 4)
+                return false;
+            string extension = "";
+            for(int i = filename.Length - 4; i < filename.Length; i++)
+            {
+                extension += filename[i];
+            }
+            if(extension==".nrn")
+                return true;
+            return false;
+        }
         void OpenFile()
         {
             try
@@ -452,6 +479,11 @@ namespace Nauron
                 openFileDialog.DefaultExt = ".nrn";
                 if (openFileDialog.ShowDialog() == true)
                 {
+                    if(!isFileExtensionCorrect(openFileDialog.SafeFileName))
+                    {
+                        MessageBox.Show("Nie wybrano pliku z rozszerzeniem .nrn");
+                        return;
+                    }
                     fileName = openFileDialog.SafeFileName;
                     filePath = openFileDialog.FileName;
                     Title = "Neuron " + fileName;
@@ -504,6 +536,7 @@ namespace Nauron
             Title = "Neuron //New file";
             initialized = false;
             CheckboxSingle.IsChecked = true;
+            btnStepBinary.IsChecked = true;
             shiftDown = sDown = ctrlDown = false;
             neuron = new Perceptron(0);
             dataManager = new DataManager();
