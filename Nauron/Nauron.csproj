@@ -8,6 +8,11 @@
     <UseWPF>true</UseWPF>
     <Configurations>Debug;Release;Test</Configurations>
     <Platforms>AnyCPU;x64</Platforms>
+    <ApplicationIcon>neuron.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="neuron.ico" />
+  </ItemGroup>
 
 </Project>
