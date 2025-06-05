@@ -351,7 +351,7 @@ namespace Nauron
             CheckboxSingle.IsChecked= false;
             CheckboxIter.IsChecked= false;
         }
-        void UncheckOtherFUnctions(object wybrany)
+        void UncheckOtherFunctions(object wybrany)
         {
             CheckBox[] functions = new[] { btnStepBinary, btnStepBipolar, btnSigmoid, btnTanh, btnReLU, btnLeakyReLU };
             foreach (CheckBox wybor in functions)
@@ -359,6 +359,22 @@ namespace Nauron
                 if(wybor!=wybrany)
                     wybor.IsChecked = false;
             }
+        }
+        void FunctionFromSaveFile()
+        {
+            CheckBox checkBox;
+            switch (neuron.GetFunction())
+            {
+                case 0: checkBox = btnStepBinary; break;
+                case 1: checkBox = btnStepBipolar; break;
+                case 2: checkBox = btnSigmoid; break;
+                case 3: checkBox = btnTanh; break;
+                case 4: checkBox = btnReLU; break;
+                case 5: checkBox = btnLeakyReLU; break;
+                default: checkBox = btnStepBinary; break;
+            }
+            checkBox.IsChecked = true;
+            UncheckOtherFunctions(checkBox);
         }
         void FunctionChangeAction(object sender, RoutedEventArgs e)
         {
@@ -374,7 +390,7 @@ namespace Nauron
                 ChangeFunction(4);
             else if(e.Source == btnLeakyReLU)
                 ChangeFunction(5);
-            UncheckOtherFUnctions(e.Source);
+            UncheckOtherFunctions(e.Source);
         }
         public double Normalize(double value, double min, double max, double targetMin, double targetMax)
         {
@@ -489,6 +505,7 @@ namespace Nauron
                     Title = "Neuron " + fileName;
                     neuron = dataManager.OpenFile(this, filePath);
                     (var x, var a) = neuron.GetData();
+                    FunctionFromSaveFile();
                     if (x != null)
                     {
                         DrawData();
