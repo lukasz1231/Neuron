@@ -63,17 +63,17 @@ namespace Nauron.Models
         {
             if (trainingX == null)
                 throw new ArgumentException("Nie wgrano danych");
-            if (learningRate == 0.0)
-                throw new ArgumentException("Nie podano tempa uczenia");
+            if (learningRate <= 0.0)
+                throw new ArgumentException("Nie podano poprawnego tempa uczenia");
 
             double sumSquaredError = 0.0;
             for (int t = 0; t < trainingX.Count; t++)
             {
                 double output = Calculate(t);
-                double error = trainingD[t] - ActivationFunction(output);
+                double error = trainingD[t] - output;
                 for (int i = 0; i < trainingX[t].Count; i++)
-                    W[i] = W[i] + learningRate * trainingX[t][i] * (trainingD[t] - output);
-                w0 = w0 + learningRate * (trainingD[t] - output);
+                    W[i] = W[i] + learningRate * trainingX[t][i] * error;
+                w0 = w0 + learningRate * error;
 
                 sumSquaredError += error * error;
             }
@@ -92,7 +92,7 @@ namespace Nauron.Models
             return sum;
         }
 
-        private double ActivationFunction(double input)
+        public double ActivationFunction(double input)
         {
             switch (func)
             {
@@ -135,6 +135,8 @@ namespace Nauron.Models
         public void newData(List<List<double>> trainingX, List<double> trainingD)
         {
             this.trainingX = trainingX;
+            if(trainingD != null)
+            trainingD.ForEach(c => c = c == 0 ? -1 : c);
             this.trainingD = trainingD;
         }
         public double[] GetWeights()
@@ -155,6 +157,11 @@ namespace Nauron.Models
         }
         public (List<List<double>> trainingX, List<double> trainingD) GetData()
         {
+            if(trainingD != null){
+                List<double> d = new List<double>( trainingD.ToArray() );
+                d.ForEach(c => c = c == -1 ? 0 : c);
+                return (trainingX, d);
+            }
             return (trainingX, trainingD);
         }
         public int GetFunction()

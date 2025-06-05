@@ -16,7 +16,9 @@ namespace Nauron.Models
         int func;
         List<double> trainingErrors;
         Random rand;
-        public Perceptron(int func) {
+        double learningRate;
+        public Perceptron(int func)
+        {
             this.func = func;
             rand = new Random();
             trainingErrors = new List<double>();
@@ -61,17 +63,19 @@ namespace Nauron.Models
         {
             if (trainingX==null)
                 throw new ArgumentException("Nie wgrano danych");
+            if (learningRate <= 0.0)
+                throw new ArgumentException("Nie podano poprawnego tempa uczenia");
 
             double sumSquaredError = 0.0;
             for (int t = 0; t < trainingX.Count; t++)
             {
-                double output = Calculate(t);
+                double output = Calculate(t);   
                 double error = trainingD[t] - output;
 
                 if (error != 0){
                     for (int i = 0; i < trainingX[t].Count; i++)
-                        W[i] = W[i] + trainingX[t][i] * error;
-                    w0 = w0 + error;
+                        W[i] = W[i] + learningRate * trainingX[t][i] * error;
+                    w0 = w0 + learningRate * error;
                 }
 
                 sumSquaredError += error * error;
@@ -119,7 +123,7 @@ namespace Nauron.Models
         }
         public void ChangeLearningRate(double s)
         {
-            ;
+            learningRate = s;
         }
         public void ChangeWeights(double[] w)
         {

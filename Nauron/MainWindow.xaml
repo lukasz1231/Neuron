@@ -15,15 +15,10 @@
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal" Grid.Row="0">
             <Menu >
-                <MenuItem Name="Menu1" Header="Opcje">
+                <MenuItem Height="26" Name="Menu1" Header="Opcje">
                     <MenuItem Header="Otwórz" Click="OpenButton" ToolTip="Ctrl+S"></MenuItem>
                     <MenuItem Header="Zapisz" Click="SaveButton" ToolTip="Ctrl+S"></MenuItem>
                     <MenuItem Header="Zapisz jako" Click="SaveAsButton" ToolTip="Ctrl+Shift+S"></MenuItem>
-                    <MenuItem Header="Tryb trenowania">
-                        <CheckBox x:Name="CheckboxSingle" Checked="ChangeTrainingModeSingle"  Content="Pojedyncza iteracja"></CheckBox>
-                        <CheckBox x:Name="CheckboxIter" Checked="ChangeTrainingModeMaxIt" Content="Maksymalna liczba iteracji"></CheckBox>
-                        <CheckBox x:Name="CheckboxErr" Checked="ChangeTrainingModeMaxErr" Content="Do błedu uczenia"></CheckBox>
-                    </MenuItem>
                     <MenuItem Header="Funkcja aktywacji">
                         <CheckBox x:Name="btnStepBinary" Content="StepBinary" Click="FunctionChangeAction"></CheckBox>
                         <CheckBox x:Name="btnStepBipolar" Content="StepBipolar" Click="FunctionChangeAction"></CheckBox>
@@ -36,11 +31,18 @@
                         <CheckBox x:Name="PercCheckbox" Content="Percepton" Checked="ChangeNeuronP"></CheckBox>
                         <CheckBox x:Name="AdalCheckbox" Content="Adaline" Checked="ChangeNeuronA"></CheckBox>
                     </MenuItem>
-                    <MenuItem Header="Edytuj dane" Click="OpenDataEditor"></MenuItem>
                 </MenuItem>
             </Menu>
-            <Label Content="Maksymalny błąd" Margin="120,0,0,0"/>
+            <Label Content="Maksymalny błąd" Margin="100,0,0,0" Width="105"/>
             <Label Content="Maksymalna liczba iteracji" Margin="0,0,0,0"/>
+            <Button Margin="70,0,0,0" Content="Edytuj dane" Click="OpenDataEditor"></Button>
+            <Menu Margin="90,0,0,0">
+                <MenuItem Height="26" Header="Tryb trenowania">
+                    <CheckBox x:Name="CheckboxSingle" Checked="ChangeTrainingModeSingle"  Content="Pojedyncza iteracja"></CheckBox>
+                    <CheckBox x:Name="CheckboxIter" Checked="ChangeTrainingModeMaxIt" Content="Maksymalna liczba iteracji"></CheckBox>
+                    <CheckBox x:Name="CheckboxErr" Checked="ChangeTrainingModeMaxErr" Content="Do błedu uczenia"></CheckBox>
+                </MenuItem>
+            </Menu>
         </StackPanel>
         <StackPanel Orientation="Horizontal" Margin="10" Grid.Row="1" VerticalAlignment="Top">
             <TextBox x:Name="FileNameBox" Width="150" Text="data1.txt"/>

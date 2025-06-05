@@ -183,7 +183,7 @@ namespace Nauron
                     if (W[1] == 0) W[1] = 0.0000001;
                     y = Normalize(10, height - 10, 10, yMin, yMax);
                     x = -W[2] / W[1] * y - W[0] / W[1];
-                    y = 0;
+                    y = 10;
                     x = Normalize(x, xMin, xMax, 10, width - 10);
                 }
                 if (y > height - 10)
@@ -191,7 +191,7 @@ namespace Nauron
                     if (W[1] == 0) W[1] = 0.0000001;
                     y = Normalize(height - 10, height - 10, 10, yMin, yMax);
                     x = -W[2] / W[1] * y - W[0] / W[1];
-                    y = height;
+                    y = height-10;
                     x = Normalize(x, xMin, xMax, 10, width - 10);
                 }
                 polyline.Points.Add(new Point(x, y));
