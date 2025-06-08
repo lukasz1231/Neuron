@@ -39,10 +39,11 @@ namespace Nauron.Models
                 throw new ArgumentException("Złożoność tolerancji mniejsza lub równa 0");
             if (maxIterations <= 0)
                 throw new ArgumentException("Maksymalna liczba iteracji mniejsza lub równa 0");
+            trainedError = double.MaxValue;
             while (trainedError > biasToleration && maxIterations >= 0)
             {
                 maxIterations--;
-                trainedError = SingleIterationTrain();
+                SingleIterationTrain();
             }
             return trainedError;
         }
