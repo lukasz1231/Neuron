@@ -35,7 +35,6 @@ namespace Nauron.Models
         }
         public double TrainToBias(double biasToleration, long maxIterations)
         {
-            trainedError = double.MaxValue;
             if (biasToleration <= 0)
                 throw new ArgumentException("Złożoność tolerancji mniejsza lub równa 0");
             if (maxIterations <= 0)
@@ -43,7 +42,7 @@ namespace Nauron.Models
             while (trainedError > biasToleration && maxIterations >= 0)
             {
                 maxIterations--;
-                SingleIterationTrain();
+                trainedError = SingleIterationTrain();
             }
             return trainedError;
         }
@@ -136,7 +135,8 @@ namespace Nauron.Models
         {
             this.trainingX = trainingX;
             if(trainingD != null)
-            trainingD.ForEach(c => c = c == 0 ? -1 : c);
+                for(int i=0;i<trainingD.Count;i++)
+                    trainingD[i]= trainingD[i] == 0 ? -1 : 1;
             this.trainingD = trainingD;
         }
         public double[] GetWeights()
@@ -159,7 +159,8 @@ namespace Nauron.Models
         {
             if(trainingD != null){
                 List<double> d = new List<double>( trainingD.ToArray() );
-                d.ForEach(c => c = c == -1 ? 0 : c);
+                for (int i = 0; i < d.Count; i++)
+                    d[i] = d[i] == -1 ? 0 : 1;
                 return (trainingX, d);
             }
             return (trainingX, trainingD);
